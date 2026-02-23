@@ -1,0 +1,42 @@
+# Maven
+target/
+
+# Compiled class files
+*.class
+
+# Package Files
+*.jar
+*.war
+*.ear
+
+# Eclipse files
+.classpath
+.project
+.settings
+/workspace/
+
+# IntelliJ Idea files
+*.iml
+*.ipr
+*.iws
+/.idea
+
+# Mac
+.DS_Store
+
+# Test remnants
+objectstore/
+.mule/
+*.log
+temp/
+repository/
+muleEmbeddedDB/
+activemq-data/
+testdir/
+hostkey.ser
+*.h2.db
+/.java-version
+
+# Allure
+.allure
+.agents/rules/java-coding-guide.md

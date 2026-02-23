@@ -1,0 +1,71 @@
+/* Color Theme: Amber / Warm Phosphor
+   Background: #0d0900
+   Accent: #f5b942
+   Body/Mid: #c8962a
+   Dim: #f0d080
+   Dark/Subtle: #4a3000 / #1a1100 / #150f00
+*/
+
+/* Reset default colors */
+* {
+    color: #c8962a;
+}
+
+/* Background panel / root */
+.root {
+    background: #0d0900;
+}
+
+/* The giant PACK MULE header */
+.header-title {
+    color: #f5b942;
+    bold: true;
+}
+
+/* Section titles */
+.section-title {
+    color: #f5b942;
+}
+
+/* Horizontal dividers */
+.divider {
+    color: #4a3000;
+}
+
+/* Input Fields */
+FormFieldElement {
+    color: #c8962a;
+    border-color: #4a3000;
+}
+
+FormFieldElement:focus {
+    border-color: #f5b942;
+}
+
+TextInputElement {
+    color: #f0d080;
+    background: #150f00;
+}
+
+/* Custom Radio Button styling */
+.radio-group-title {
+    color: #c8962a;
+}
+
+.radio-selected {
+    color: #f5b942;
+}
+
+.radio-unselected {
+    color: #f0d080;
+}
+
+/* Footer Help Bar */
+.footer-badge {
+    color: #c8962a;
+    background: #1a1100;
+}
+
+.footer-dim {
+    color: #4a3000;
+}

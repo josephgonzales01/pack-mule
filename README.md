@@ -102,38 +102,37 @@ All project files — `pom.xml`, Mule XML flows, `log4j2.xml`, and property plac
 ```
 pack-mule/
 │
-├── app/                              # Main application module
-│   ├── src/main/java/com/pack-mule/
-│   │   ├── PackMuleApp.java         # Entry point — bootstraps TamboUI ToolkitApp
-│   │   ├── config/
-│   │   │   ├── PackMuleConfig.java  # Root config POJO (maps pack-mule.yml)
-│   │   │   └── ConfigLoader.java     # Loads & validates YAML config at startup
-│   │   │   
-│   │   ├── model/
-│   │   │   ├── UserSelection.java      # Captures all user selections
-│   │   │   ├── ProjectType.java      # Enum: REST_API, MESSAGING, BATCH, etc.
-│   │   │   └── Capability.java       # Represents a toggleable module/connector
-│   │   ├── engine/
-│   │   │   ├── ProjectGenerator.java # Orchestrates the full generation pipeline
-│   │   │   ├── ProjectScaffolder.java# Creates directory tree, writes rendered files
-│   │   │   ├── TemplateRenderer.java # FreeMarker: resolves + renders .ftl → file
-│   │   │   ├── DependencyResolver.java # Maps selected capabilities → dep objects
-│   │   │   └── PostHookRunner.java   # Runs optional post-generation shell/Java hooks
-│   │   └── tui/
-│   │       ├── PackMuleToolkitApp.java  # Root ToolkitApp — screen routing & state
-│   │       ├── screen/
-│   │       │   ├── WelcomeScreen.java
-│   │       │   ├── ProjectInfoScreen.java   # Name, groupId, version inputs
-│   │       │   ├── RuntimeScreen.java       # Mule runtime and jdk version picker
-│   │       │   ├── ProjectTypeScreen.java   # Project type selection
-│   │       │   ├── CapabilityScreen.java    # Checkbox grid for connectors/modules
-│   │       │   ├── SummaryScreen.java       # Review all selections before generate
-│   │       │   └── ProgressScreen.java      # Inline Display — live scaffolding output
-│   │       └── theme/
-│   │           └── pack-mule.tcss           # TamboUI CSS theme (colors, borders)
-│   └── src/main/resources/
-│       ├── pack-mule.yml             # ← Primary configuration file
-│       └── pack-mule.tcss            # TamboUI CSS theme
+├── src/main/java/com/packmule/      # Main application source
+│   ├── PackMuleApp.java             # Entry point — bootstraps TamboUI ToolkitApp
+│   ├── config/
+│   │   ├── PackMuleConfig.java      # Root config POJO (maps pack-mule.yml)
+│   │   └── ConfigLoader.java        # Loads & validates YAML config at startup
+│   ├── model/
+│   │   ├── UserSelection.java       # Captures all user selections
+│   │   ├── ProjectType.java         # Enum: REST_API, MESSAGING, BATCH, etc.
+│   │   └── Capability.java          # Represents a toggleable module/connector
+│   ├── engine/
+│   │   ├── ProjectGenerator.java    # Orchestrates the full generation pipeline
+│   │   ├── ProjectScaffolder.java   # Creates directory tree, writes rendered files
+│   │   ├── TemplateRenderer.java    # FreeMarker: resolves + renders .ftl → file
+│   │   ├── DependencyResolver.java  # Maps selected capabilities → dep objects
+│   │   └── PostHookRunner.java      # Runs optional post-generation shell/Java hooks
+│   └── tui/
+│       ├── PackMuleToolkitApp.java  # Root ToolkitApp — screen routing & state
+│       ├── screen/
+│       │   ├── WelcomeScreen.java
+│       │   ├── ProjectInfoScreen.java   # Name, groupId, version inputs
+│       │   ├── RuntimeScreen.java       # Mule runtime and jdk version picker
+│       │   ├── ProjectTypeScreen.java   # Project type selection
+│       │   ├── CapabilityScreen.java    # Checkbox grid for connectors/modules
+│       │   ├── SummaryScreen.java       # Review all selections before generate
+│       │   └── ProgressScreen.java      # Inline Display — live scaffolding output
+│       └── theme/
+│           └── pack-mule.tcss           # TamboUI CSS theme (colors, borders)
+│
+├── src/main/resources/              # Application resources
+│   ├── pack-mule.yml                # ← Primary configuration file
+│   └── pack-mule.tcss               # TamboUI CSS theme
 │
 ├── templates/                        # FreeMarker templates — separated from app logic
 │   └── src/main/resources/templates/
@@ -190,7 +189,7 @@ ProjectGenerator.generate(UserSelection)
 
 ## Configuration Reference
 
-`app/src/main/resources/pack-mule.yml` is the single control plane for all generation behavior.
+`src/main/resources/pack-mule.yml` is the single control plane for all generation behavior.
 
 ```yaml
 # ─────────────────────────────────────────────
@@ -406,7 +405,7 @@ cd pack-mule
 mvn clean package -DskipTests
 ```
 
-Produces a fat JAR at `app/target/pack-mule-app.jar`.
+Produces a fat JAR at `target/pack-mule.jar`.
 
 ---
 
@@ -414,13 +413,13 @@ Produces a fat JAR at `app/target/pack-mule-app.jar`.
 
 ```bash
 # Interactive TUI
-java -jar app/target/pack-mule-app.jar
+java -jar target/pack-mule.jar
 
 # Use a custom config file
-java -jar app/target/pack-mule-app.jar --config /path/to/pack-mule.yml
+java -jar target/pack-mule.jar --config /path/to/pack-mule.yml
 
 # Headless mode — for CI/CD pipelines or scripting
-java -jar app/target/pack-mule-app.jar \
+java -jar target/pack-mule.jar \
   --headless \
   --name customer-order-api \
   --groupId com.acme \
@@ -434,7 +433,7 @@ java -jar app/target/pack-mule-app.jar \
 
 ```bash
 mvn -Pnative package
-./app/target/pack-mule    # Zero JVM startup time
+./target/pack-mule    # Zero JVM startup time
 ```
 
 ### Running Tests
