@@ -405,7 +405,7 @@ cd pack-mule
 mvn clean package -DskipTests
 ```
 
-Produces a fat JAR at `target/pack-mule.jar`.
+Produces a fat JAR at `target/pack-mule-app.jar`.
 
 ---
 
@@ -413,13 +413,13 @@ Produces a fat JAR at `target/pack-mule.jar`.
 
 ```bash
 # Interactive TUI
-java -jar target/pack-mule.jar
+java -jar target/pack-mule-app.jar
 
 # Use a custom config file
-java -jar target/pack-mule.jar --config /path/to/pack-mule.yml
+java -jar target/pack-mule-app.jar --config /path/to/pack-mule.yml
 
 # Headless mode — for CI/CD pipelines or scripting
-java -jar target/pack-mule.jar \
+java -jar target/pack-mule-app.jar \
   --headless \
   --name customer-order-api \
   --groupId com.acme \
