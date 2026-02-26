@@ -93,7 +93,7 @@ public class PackMuleApp extends ToolkitApp {
         }
 
         // Backspace — Delete char in text fields
-        if (event.isDeleteBackward()) {
+        if (event.code() == KeyCode.BACKSPACE) {
             projectInfoScreen.handleBackspace();
             return EventResult.HANDLED;
         }

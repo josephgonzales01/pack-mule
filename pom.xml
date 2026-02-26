@@ -63,7 +63,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.packmule.PackMuleApp</mainClass>
+                            <mainClass>dev.sugbo4j.packmule.PackMuleApp</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
