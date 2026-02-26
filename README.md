@@ -102,7 +102,7 @@ All project files — `pom.xml`, Mule XML flows, `log4j2.xml`, and property plac
 ```
 pack-mule/
 │
-├── src/main/java/com/packmule/      # Main application source
+├── src/main/java/dev/sugbo4j/packmule/      # Main application source
 │   ├── PackMuleApp.java             # Entry point — bootstraps TamboUI ToolkitApp
 │   ├── config/
 │   │   ├── PackMuleConfig.java      # Root config POJO (maps pack-mule.yml)
@@ -118,15 +118,11 @@ pack-mule/
 │   │   ├── DependencyResolver.java  # Maps selected capabilities → dep objects
 │   │   └── PostHookRunner.java      # Runs optional post-generation shell/Java hooks
 │   └── tui/
-│       ├── PackMuleToolkitApp.java  # Root ToolkitApp — screen routing & state
-│       ├── screen/
-│       │   ├── WelcomeScreen.java
-│       │   ├── ProjectInfoScreen.java   # Name, groupId, version inputs
-│       │   ├── RuntimeScreen.java       # Mule runtime and jdk version picker
-│       │   ├── ProjectTypeScreen.java   # Project type selection
-│       │   ├── CapabilityScreen.java    # Checkbox grid for connectors/modules
-│       │   ├── SummaryScreen.java       # Review all selections before generate
-│       │   └── ProgressScreen.java      # Inline Display — live scaffolding output
+│       ├── PackMuleToolkitApp.java  # Root ToolkitApp — screen routing & state      
+│       ├── ProjectInfoScreen.java   # Name, groupId, runtime version inputs
+│       ├── CapabilityScreen.java    # Checkbox list for connectors/modules
+│       ├── SummaryScreen.java       # Review all selections before generate
+│       ├── ProgressScreen.java      # Inline Display — live scaffolding output
 │       └── theme/
 │           └── pack-mule.tcss           # TamboUI CSS theme (colors, borders)
 │
