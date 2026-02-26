@@ -123,12 +123,11 @@ pack-mule/
 │       ├── CapabilityScreen.java    # Checkbox list for connectors/modules
 │       ├── SummaryScreen.java       # Review all selections before generate
 │       ├── ProgressScreen.java      # Inline Display — live scaffolding output
-│       └── theme/
-│           └── pack-mule.tcss           # TamboUI CSS theme (colors, borders)
+│       └── Theme.java               # TUI text and border color themes
 │
 ├── src/main/resources/              # Application resources
-│   ├── pack-mule.yml                # ← Primary configuration file
-│   └── pack-mule.tcss               # TamboUI CSS theme
+│   └── pack-mule.yml                # ← Primary configuration file
+│   
 │
 ├── templates/                        # FreeMarker templates — separated from app logic
 │   └── src/main/resources/templates/
