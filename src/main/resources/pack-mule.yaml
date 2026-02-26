@@ -1,0 +1,158 @@
+# ─────────────────────────────────────────────
+# Pack Mule Configuration,
+# supported versions and default selections
+# ─────────────────────────────────────────────
+
+defaults:
+  groupId: "com.mycompany"
+  runtime: "4.6.0"
+  jdk: "17"
+  outputDirectory: "."
+
+runtime:
+  - version: "4.11.0"
+  - version: "4.9.0"
+  - version: "4.6.0"
+
+jdk:
+  - version: 8
+  - version: 11
+  - version: 17
+
+# ─────────────────────────────────────────────
+# XML file naming conventions
+# Supported tokens: {projectName}, {type}
+# ─────────────────────────────────────────────
+fileNaming:
+  mainFlow: "{projectName}-main.xml"
+  errorHandler: "{projectName}-error-handler.xml"
+  globalConfig: "global-config.xml"
+  apiConsole: "{projectName}-api-console.xml"
+  log4j2: "log4j2.xml"
+
+# ─────────────────────────────────────────────
+# Project types → template folder mapping
+# ─────────────────────────────────────────────
+projectTypes:
+  - id: REST_API
+    label: "RESTful API"
+    templateDir: "rest-api"
+    defaultCapabilities: [HTTP_LISTENER, APIKIT, ERROR_HANDLING]
+
+  - id: MESSAGING
+    label: "Message Subscriber / Publisher"
+    templateDir: "messaging"
+    defaultCapabilities: [ANYPOINT_MQ, ERROR_HANDLING]
+
+  - id: BATCH
+    label: "Batch / File Processing"
+    templateDir: "batch"
+    defaultCapabilities: [FILE_CONNECTOR, BATCH_MODULE, ERROR_HANDLING]
+
+  - id: SCHEDULED
+    label: "Scheduled Job"
+    templateDir: "scheduled"
+    defaultCapabilities: [SCHEDULER, ERROR_HANDLING]
+
+# ─────────────────────────────────────────────
+# Capability → Maven dependency mapping
+# Add new connectors here
+# ─────────────────────────────────────────────
+capabilities:
+  - id: HTTP_LISTENER
+    label: "HTTP Listener"
+    category: "Core"
+    dependencies:
+      - groupId: "org.mule.connectors"
+        artifactId: "mule-http-connector"
+        version: "1.9.2"
+        classifier: "mule-plugin"
+
+  - id: APIKIT
+    label: "APIkit Router"
+    category: "Core"
+    dependencies:
+      - groupId: "org.mule.modules"
+        artifactId: "mule-apikit-module"
+        version: "1.9.0"
+        classifier: "mule-plugin"
+
+  - id: DATABASE
+    label: "Database (JDBC)"
+    category: "Connector"
+    dependencies:
+      - groupId: "org.mule.connectors"
+        artifactId: "mule-db-connector"
+        version: "1.14.7"
+        classifier: "mule-plugin"
+
+  - id: SALESFORCE
+    label: "Salesforce"
+    category: "Connector"
+    dependencies:
+      - groupId: "com.mulesoft.connectors"
+        artifactId: "mule-salesforce-connector"
+        version: "10.18.0"
+        classifier: "mule-plugin"
+
+  - id: ANYPOINT_MQ
+    label: "Anypoint MQ"
+    category: "Connector"
+    dependencies:
+      - groupId: "com.mulesoft.connectors"
+        artifactId: "anypoint-mq-connector"
+        version: "4.0.7"
+        classifier: "mule-plugin"
+
+  - id: FILE_CONNECTOR
+    label: "File / FTP"
+    category: "Connector"
+    dependencies:
+      - groupId: "org.mule.connectors"
+        artifactId: "mule-file-connector"
+        version: "1.5.2"
+        classifier: "mule-plugin"
+      - groupId: "org.mule.connectors"
+        artifactId: "mule-ftp-connector"
+        version: "1.8.5"
+        classifier: "mule-plugin"
+
+  - id: KAFKA
+    label: "Kafka"
+    category: "Connector"
+    dependencies:
+      - groupId: "org.mule.connectors"
+        artifactId: "mule-kafka-connector"
+        version: "4.7.3"
+        classifier: "mule-plugin"
+
+  - id: BATCH_MODULE
+    label: "Batch Module"
+    category: "Module"
+    dependencies:
+      - groupId: "com.mulesoft.modules"
+        artifactId: "mule-batch-module"
+        version: "2.3.0"
+        classifier: "mule-plugin"
+
+  - id: ERROR_HANDLING
+    label: "Error Handling (Global)"
+    category: "Core"
+    dependencies: [] # Template-only, no extra Maven dependency
+
+  - id: SCHEDULER
+    label: "Scheduler"
+    category: "Core"
+    dependencies: [] # Built into Mule runtime
+
+# ─────────────────────────────────────────────
+# Post-generation hooks (optional)
+# ─────────────────────────────────────────────
+hooks:
+  postGenerate:
+    - type: shell
+      command: "git init {outputDir}/{projectName}"
+      enabled: false
+    - type: shell
+      command: "cp shared/log4j2.xml {outputDir}/{projectName}/src/main/resources/"
+      enabled: false

@@ -21,7 +21,14 @@
 
 ## Overview
 
-Pack Mule is a developer productivity tool that brings the Spring Initializr experience to MuleSoft development. Instead of manually copying boilerplate XML flows and hunting for connector dependency coordinates, you launch a TUI in your terminal, answer a few questions, and get a fully scaffolded, ready-to-import Anypoint Studio project in seconds.
+Pack Mule is a developer productivity tool that brings a fast, interactive project scaffolding experience to MuleSoft development. As an experienced MuleSoft developer, I built this tool to solve a problem I've encountered at every client and on every project — **enforcing coding standards is genuinely hard work**.
+
+Every organisation has their own Mule coding standards, but getting developers to consistently follow them is a constant battle. The typical workarounds all have real limitations:
+
+- **Maven Archetypes** — the go-to solution, but they're rigid. **You generate a single project type (HTTP-based *or* message queue-based), and that's it.** In reality, most Mule applications aren't that simple; a single app might need an HTTP listener, a message queue consumer, a database connection, and a scheduler all at once.
+- **Copying an existing project** — developers grab a project that has the right standards baked in and **spend hours refactoring it to fit their current use case**, stripping out what they don't need and **hoping they don't break something in the process**.
+
+Pack Mule solves this by letting you **select exactly the capabilities your project needs from the start**. Instead of manually copying boilerplate XML flows and hunting for connector dependency coordinates, you launch a TUI in your terminal, answer a few questions, toggle the modules you need, and get a **fully scaffolded, ready-to-import Anypoint Studio project in seconds** — with your organisation's standards already baked in.
 
 ```
 ╔══════════════════════════════════════════════════════╗
@@ -61,28 +68,6 @@ All project files — `pom.xml`, Mule XML flows, `log4j2.xml`, and property plac
 
 ## Architecture
 
-```
-┌──────────────────────────────────────────────────────────────────┐
-│                        Pack Mule TUI App                         │
-│                                                                  │
-│  ┌──────────────────────┐   ┌───────────────┐   ┌────────────┐  │
-│  │     TUI Layer        │   │  Core Engine  │   │  Template  │  │
-│  │  (TamboUI Toolkit)   │──▶ (Orchestrate) ──▶ │   Layer    │  │
-│  │                      │   │               │   │(FreeMarker)│  │
-│  │ - ToolkitApp screens │   │ - UserSelection │   │            │  │
-│  │ - Element DSL panels │   │ - DepResolver │   │ - Flow XML │  │
-│  │ - TCSS theming       │   │ - Scaffolder  │   │ - pom.xml  │  │
-│  │ - Focus management   │   │ - ConfigLoader│   │ - log4j2   │  │
-│  │ - Inline Display     │   │ - HookRunner  │   │ - props    │  │
-│  └──────────────────────┘   └───────────────┘   └────────────┘  │
-│                                    │                             │
-│                    ┌───────────────┴──────────────┐             │
-│                    │       pack-mule.yml           │             │
-│                    │  (runtimes, types, deps,      │             │
-│                    │   file naming, hooks)         │             │
-│                    └──────────────────────────────┘              │
-└──────────────────────────────────────────────────────────────────┘
-```
 
 ### Key Architectural Decisions
 
@@ -96,65 +81,6 @@ All project files — `pom.xml`, Mule XML flows, `log4j2.xml`, and property plac
 | Distribution | Fat JAR + optional GraalVM native | Fat JAR for simplicity; native binary for CI/CD agent use |
 
 ---
-
-## Project Structure
-
-```
-pack-mule/
-│
-├── src/main/java/dev/sugbo4j/packmule/      # Main application source
-│   ├── PackMuleApp.java             # Entry point — bootstraps TamboUI ToolkitApp
-│   ├── config/
-│   │   ├── PackMuleConfig.java      # Root config POJO (maps pack-mule.yml)
-│   │   └── ConfigLoader.java        # Loads & validates YAML config at startup
-│   ├── model/
-│   │   ├── UserSelection.java       # Captures all user selections
-│   │   ├── ProjectType.java         # Enum: REST_API, MESSAGING, BATCH, etc.
-│   │   └── Capability.java          # Represents a toggleable module/connector
-│   ├── engine/
-│   │   ├── ProjectGenerator.java    # Orchestrates the full generation pipeline
-│   │   ├── ProjectScaffolder.java   # Creates directory tree, writes rendered files
-│   │   ├── TemplateRenderer.java    # FreeMarker: resolves + renders .ftl → file
-│   │   ├── DependencyResolver.java  # Maps selected capabilities → dep objects
-│   │   └── PostHookRunner.java      # Runs optional post-generation shell/Java hooks
-│   └── tui/
-│       ├── PackMuleToolkitApp.java  # Root ToolkitApp — screen routing & state      
-│       ├── ProjectInfoScreen.java   # Name, groupId, runtime version inputs
-│       ├── CapabilityScreen.java    # Checkbox list for connectors/modules
-│       ├── SummaryScreen.java       # Review all selections before generate
-│       ├── ProgressScreen.java      # Inline Display — live scaffolding output
-│       └── Theme.java               # TUI text and border color themes
-│
-├── src/main/resources/              # Application resources
-│   └── pack-mule.yml                # ← Primary configuration file
-│   
-│
-├── templates/                        # FreeMarker templates — separated from app logic
-│   └── src/main/resources/templates/
-│       ├── rest-api/
-│       │   ├── main-flow.xml.ftl
-│       │   ├── error-handler.xml.ftl
-│       │   └── api-console.xml.ftl
-│       ├── messaging/
-│       │   ├── subscriber-flow.xml.ftl
-│       │   └── publisher-flow.xml.ftl
-│       ├── batch/
-│       │   └── batch-job.xml.ftl
-│       ├── scheduled/
-│       │   └── scheduler-flow.xml.ftl
-│       ├── common/
-│       │   ├── global-config.xml.ftl
-│       │   └── log4j2.xml.ftl
-│       └── pom/
-│           └── pom.xml.ftl           # Full pom with conditional dependency blocks
-│
-├── integration-test/
-│   └── src/test/java/com/pack-mule/
-│       └── GenerationIntegrationTest.java
-│
-├── pom.xml                           # Parent Maven POM (multi-module)
-└── README.md
-```
 
 ### Generation Pipeline
 
@@ -184,168 +110,7 @@ ProjectGenerator.generate(UserSelection)
 
 ## Configuration Reference
 
-`src/main/resources/pack-mule.yml` is the single control plane for all generation behavior.
-
-```yaml
-# ─────────────────────────────────────────────
-# Pack Mule Configuration,
-# supported versions and default selections
-# ─────────────────────────────────────────────
-
-defaults:
-  groupId: "com.mycompany"
-  runtime: "4.6.0"  
-  jdk: "17"
-  outputDirectory: "."
-
-runtime:
-  - version: "4.11.0"
-  - version: "4.9.0"
-  - version: "4.6.0"
-
-jdk:
-  - version: 8   
-  - version: 11    
-  - version: 17
-
-# ─────────────────────────────────────────────
-# XML file naming conventions
-# Supported tokens: {projectName}, {type}
-# ─────────────────────────────────────────────
-fileNaming:
-  mainFlow: "{projectName}-main.xml"
-  errorHandler: "{projectName}-error-handler.xml"
-  globalConfig: "global-config.xml"
-  apiConsole: "{projectName}-api-console.xml"
-  log4j2: "log4j2.xml"
-
-# ─────────────────────────────────────────────
-# Project types → template folder mapping
-# ─────────────────────────────────────────────
-projectTypes:
-  - id: REST_API
-    label: "RESTful API"
-    templateDir: "rest-api"
-    defaultCapabilities: [HTTP_LISTENER, APIKIT, ERROR_HANDLING]
-
-  - id: MESSAGING
-    label: "Message Subscriber / Publisher"
-    templateDir: "messaging"
-    defaultCapabilities: [ANYPOINT_MQ, ERROR_HANDLING]
-
-  - id: BATCH
-    label: "Batch / File Processing"
-    templateDir: "batch"
-    defaultCapabilities: [FILE_CONNECTOR, BATCH_MODULE, ERROR_HANDLING]
-
-  - id: SCHEDULED
-    label: "Scheduled Job"
-    templateDir: "scheduled"
-    defaultCapabilities: [SCHEDULER, ERROR_HANDLING]
-
-# ─────────────────────────────────────────────
-# Capability → Maven dependency mapping
-# Add new connectors here
-# ─────────────────────────────────────────────
-capabilities:
-  - id: HTTP_LISTENER
-    label: "HTTP Listener"
-    category: "Core"
-    dependencies:
-      - groupId: "org.mule.connectors"
-        artifactId: "mule-http-connector"
-        version: "1.9.2"
-        classifier: "mule-plugin"
-
-  - id: APIKIT
-    label: "APIkit Router"
-    category: "Core"
-    dependencies:
-      - groupId: "org.mule.modules"
-        artifactId: "mule-apikit-module"
-        version: "1.9.0"
-        classifier: "mule-plugin"
-
-  - id: DATABASE
-    label: "Database (JDBC)"
-    category: "Connector"
-    dependencies:
-      - groupId: "org.mule.connectors"
-        artifactId: "mule-db-connector"
-        version: "1.14.7"
-        classifier: "mule-plugin"
-
-  - id: SALESFORCE
-    label: "Salesforce"
-    category: "Connector"
-    dependencies:
-      - groupId: "com.mulesoft.connectors"
-        artifactId: "mule-salesforce-connector"
-        version: "10.18.0"
-        classifier: "mule-plugin"
-
-  - id: ANYPOINT_MQ
-    label: "Anypoint MQ"
-    category: "Connector"
-    dependencies:
-      - groupId: "com.mulesoft.connectors"
-        artifactId: "anypoint-mq-connector"
-        version: "4.0.7"
-        classifier: "mule-plugin"
-
-  - id: FILE_CONNECTOR
-    label: "File / FTP"
-    category: "Connector"
-    dependencies:
-      - groupId: "org.mule.connectors"
-        artifactId: "mule-file-connector"
-        version: "1.5.2"
-        classifier: "mule-plugin"
-      - groupId: "org.mule.connectors"
-        artifactId: "mule-ftp-connector"
-        version: "1.8.5"
-        classifier: "mule-plugin"
-
-  - id: KAFKA
-    label: "Kafka"
-    category: "Connector"
-    dependencies:
-      - groupId: "org.mule.connectors"
-        artifactId: "mule-kafka-connector"
-        version: "4.7.3"
-        classifier: "mule-plugin"
-
-  - id: BATCH_MODULE
-    label: "Batch Module"
-    category: "Module"
-    dependencies:
-      - groupId: "com.mulesoft.modules"
-        artifactId: "mule-batch-module"
-        version: "2.3.0"
-        classifier: "mule-plugin"
-
-  - id: ERROR_HANDLING
-    label: "Error Handling (Global)"
-    category: "Core"
-    dependencies: []        # Template-only, no extra Maven dependency
-
-  - id: SCHEDULER
-    label: "Scheduler"
-    category: "Core"
-    dependencies: []        # Built into Mule runtime
-
-# ─────────────────────────────────────────────
-# Post-generation hooks (optional)
-# ─────────────────────────────────────────────
-hooks:
-  postGenerate:
-    - type: shell
-      command: "git init {outputDir}/{projectName}"
-      enabled: false
-    - type: shell
-      command: "cp shared/log4j2.xml {outputDir}/{projectName}/src/main/resources/"
-      enabled: false
-```
+[`pack-mule.yml`](./src/main/resources/pack-mule.yml) is the single control plane for all generation behavior.
 
 ---
 
