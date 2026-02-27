@@ -1,5 +1,8 @@
 package dev.sugbo4j.packmule.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Mutable state holding the current project configuration for Pack Mule.
  * Stores all user selections for project generation.
@@ -16,15 +19,15 @@ public class ProjectConfig {
     private String javaVersion = "11";
     private String trigger = null;
 
-    // Available options
+    // Queue Type (only applicable when trigger = "Messaging / Queue")
+    private String queueType = null;
+
+    // Additional Capabilities (list of capability keys)
+    private List<String> capabilities = new ArrayList<>();
+
+    // Available options (triggers moved to ProjectTriggerAndCapabilities)
     public static final String[] MULE_RUNTIMES = { "4.9.0", "4.10.0", "4.11.0" };
     public static final String[] JAVA_VERSIONS = { "11", "17" };
-    public static final String[] TRIGGERS = {
-            "HTTP Listener",
-            "Scheduler",
-            "Salesforce Event",
-            "Messaging / Queue"
-    };
 
     // Getters and Setters
     public String getProjectName() {
@@ -122,25 +125,89 @@ public class ProjectConfig {
      * Returns -1 if no trigger is selected.
      */
     public int getTriggerIndex() {
-        if (trigger == null) {
-            return -1;
-        }
-        for (int i = 0; i < TRIGGERS.length; i++) {
-            if (TRIGGERS[i].equals(trigger)) {
-                return i;
-            }
-        }
-        return -1;
+        return ProjectTriggerAndCapabilities.getTriggerIndex(trigger);
     }
 
     /**
      * Set Trigger by index.
      */
     public void setTriggerByIndex(int index) {
-        if (index >= 0 && index < TRIGGERS.length) {
-            this.trigger = TRIGGERS[index];
+        if (index >= 0 && index < ProjectTriggerAndCapabilities.TRIGGERS.length) {
+            this.trigger = ProjectTriggerAndCapabilities.TRIGGERS[index];
         } else if (index == -1) {
             this.trigger = null;
         }
+    }
+
+    // ========== Queue Type ==========
+
+    public String getQueueType() {
+        return queueType;
+    }
+
+    public void setQueueType(String queueType) {
+        this.queueType = queueType;
+    }
+
+    /**
+     * Get the index of the currently selected Queue Type.
+     * Returns -1 if no queue type is selected.
+     */
+    public int getQueueTypeIndex() {
+        return ProjectTriggerAndCapabilities.getQueueTypeIndex(queueType);
+    }
+
+    /**
+     * Set Queue Type by index.
+     */
+    public void setQueueTypeByIndex(int index) {
+        QueueType[] queueTypes = QueueType.values();
+        if (index >= 0 && index < queueTypes.length) {
+            this.queueType = queueTypes[index].getDisplayName();
+        } else if (index == -1) {
+            this.queueType = null;
+        }
+    }
+
+    /**
+     * Check if the current trigger requires a queue type selection.
+     */
+    public boolean isQueueTypeRequired() {
+        return "Messaging / Queue".equals(trigger);
+    }
+
+    // ========== Capabilities ==========
+
+    public List<String> getCapabilities() {
+        return capabilities;
+    }
+
+    public void setCapabilities(List<String> capabilities) {
+        this.capabilities = capabilities != null ? capabilities : new ArrayList<>();
+    }
+
+    /**
+     * Toggle a capability in the list.
+     */
+    public void toggleCapability(String key) {
+        if (capabilities.contains(key)) {
+            capabilities.remove(key);
+        } else {
+            capabilities.add(key);
+        }
+    }
+
+    /**
+     * Check if a capability is selected.
+     */
+    public boolean hasCapability(String key) {
+        return capabilities.contains(key);
+    }
+
+    /**
+     * Check if the trigger implies Anypoint MQ (when queue type is Anypoint MQ).
+     */
+    public boolean isAnypointMQFromTrigger() {
+        return "Anypoint MQ".equals(queueType);
     }
 }
