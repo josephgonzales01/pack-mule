@@ -14,10 +14,17 @@ public class ProjectConfig {
     // Runtime and JDK Version
     private String muleRuntime = "4.6.0";
     private String javaVersion = "11";
+    private String trigger = null;
 
     // Available options
-    public static final String[] MULE_RUNTIMES = { "4.4.0", "4.5.0", "4.6.0" };
-    public static final String[] JAVA_VERSIONS = { "8", "11", "17" };
+    public static final String[] MULE_RUNTIMES = { "4.9.0", "4.10.0", "4.11.0" };
+    public static final String[] JAVA_VERSIONS = { "11", "17" };
+    public static final String[] TRIGGERS = {
+            "HTTP Listener",
+            "Scheduler",
+            "Salesforce Event",
+            "Messaging / Queue"
+    };
 
     // Getters and Setters
     public String getProjectName() {
@@ -99,6 +106,41 @@ public class ProjectConfig {
     public void setJavaVersionByIndex(int index) {
         if (index >= 0 && index < JAVA_VERSIONS.length) {
             this.javaVersion = JAVA_VERSIONS[index];
+        }
+    }
+
+    public String getTrigger() {
+        return trigger;
+    }
+
+    public void setTrigger(String trigger) {
+        this.trigger = trigger;
+    }
+
+    /**
+     * Get the index of the currently selected Trigger.
+     * Returns -1 if no trigger is selected.
+     */
+    public int getTriggerIndex() {
+        if (trigger == null) {
+            return -1;
+        }
+        for (int i = 0; i < TRIGGERS.length; i++) {
+            if (TRIGGERS[i].equals(trigger)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Set Trigger by index.
+     */
+    public void setTriggerByIndex(int index) {
+        if (index >= 0 && index < TRIGGERS.length) {
+            this.trigger = TRIGGERS[index];
+        } else if (index == -1) {
+            this.trigger = null;
         }
     }
 }

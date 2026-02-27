@@ -70,20 +70,46 @@ public class PackMuleApp extends ToolkitApp {
 
         // Arrow keys — Up/Down navigate between fields, Left/Right cycle radio options
         if (event.isUp()) {
-            projectInfoScreen.focusPrevious();
+            if (projectInfoScreen.isVerticalListFocused()) {
+                projectInfoScreen.cycleOption(-1);
+            } else {
+                projectInfoScreen.focusPrevious();
+            }
             return EventResult.HANDLED;
         }
         if (event.isDown()) {
-            projectInfoScreen.focusNext();
+            if (projectInfoScreen.isVerticalListFocused()) {
+                projectInfoScreen.cycleOption(1);
+            } else {
+                projectInfoScreen.focusNext();
+            }
             return EventResult.HANDLED;
         }
         if (event.isLeft()) {
-            projectInfoScreen.cycleOption(-1);
+            if (!projectInfoScreen.isVerticalListFocused()) {
+                projectInfoScreen.cycleOption(-1);
+            }
             return EventResult.HANDLED;
         }
         if (event.isRight()) {
-            projectInfoScreen.cycleOption(1);
+            if (!projectInfoScreen.isVerticalListFocused()) {
+                projectInfoScreen.cycleOption(1);
+            }
             return EventResult.HANDLED;
+        }
+
+        // Space - toggle selection in vertical lists
+        if (event.isChar(' ') && projectInfoScreen.isVerticalListFocused()) {
+            projectInfoScreen.toggleTrigger();
+            return EventResult.HANDLED;
+        }
+
+        // n / N - Next (if trigger selected)
+        if (event.isCharIgnoreCase('n')) {
+            if (config.getTriggerIndex() != -1) {
+                // TODO: advance to screen 2
+                return EventResult.HANDLED;
+            }
         }
 
         // c — Clear current text field (when not in a text field, do nothing)
