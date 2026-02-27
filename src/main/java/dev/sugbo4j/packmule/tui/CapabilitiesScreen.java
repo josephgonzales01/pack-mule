@@ -198,7 +198,7 @@ public class CapabilitiesScreen {
 
         elements.add(renderSectionTitle("      Queue Type ", t));
         elements.add(text(""));
-        elements.add(text("  Select the messaging technology for this flow:").fg(t.primaryDim()));
+        elements.add(text("  Select the messaging technology:").fg(t.primaryDim()));
         elements.add(text(""));
 
         boolean isListFocused = (focusArea == FocusArea.QUEUE_TYPE);
@@ -242,7 +242,7 @@ public class CapabilitiesScreen {
 
         elements.add(renderSectionTitle("      Additional Capabilities ", t));
         elements.add(text(""));
-        elements.add(text("  Select connectors to include in pom.xml:").fg(t.primaryDim()));
+        elements.add(text("  Select connectors to include:").fg(t.primaryDim()));
         elements.add(text(""));
 
         boolean isListFocused = (focusArea == FocusArea.CAPABILITIES);

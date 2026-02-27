@@ -160,7 +160,7 @@ ${hasCapability("DATABASE")} → true / false
 ### Install & Build
 
 ```bash
-git clone https://github.com/your-org/pack-mule.git
+git clone https://github.com/josephgonzales01/pack-mule.git
 cd pack-mule
 mvn clean package -DskipTests
 ```
@@ -177,16 +177,6 @@ java -jar target/pack-mule-app.jar
 
 # Use a custom config file
 java -jar target/pack-mule-app.jar --config /path/to/pack-mule.yml
-
-# Headless mode — for CI/CD pipelines or scripting
-java -jar target/pack-mule-app.jar \
-  --headless \
-  --name customer-order-api \
-  --groupId com.acme \
-  --runtime 4.6.0 \
-  --type REST_API \
-  --capabilities HTTP_LISTENER,APIKIT,DATABASE,ERROR_HANDLING \
-  --output ./generated
 ```
 
 ### Compile to Native Binary (GraalVM)

@@ -314,7 +314,7 @@ public class ProjectInfoScreen {
 
         elements.add(renderSectionTitle("      Select Trigger ", t));
         elements.add(text(""));
-        elements.add(text("  What is the Entry point for app?").fg(t.primaryDim()));
+        elements.add(text("  What is the Entry point for this app?").fg(t.primaryDim()));
         elements.add(text(""));
 
         boolean isListFocused = (focusArea == FocusArea.TRIGGER);
