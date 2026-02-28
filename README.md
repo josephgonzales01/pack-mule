@@ -96,7 +96,7 @@ ProjectGenerator.generate(UserSelection)
 
 ## Configuration Reference
 
-[`pack-mule.yml`](./src/main/resources/pack-mule.yml) is the single control plane for all generation behavior.
+[`pack-mule.yaml`](./src/main/resources/pack-mule.yaml) is the single control plane for all generation behavior.
 
 ---
 
