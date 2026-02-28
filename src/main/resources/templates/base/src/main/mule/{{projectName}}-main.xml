@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+
+    <flow name="{{projectName}}-main-flow" doc:id="{{projectName}}-main-flow">
+        <!-- Trigger logic will be injected here if applicable based on TUI selection -->
+        <logger level="INFO" doc:name="Log starting payload" message="Starting processing..."/>
+        <set-payload value="#['Done processing']" doc:name="Set response"/>
+    </flow>
+</mule>

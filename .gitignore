@@ -40,3 +40,4 @@ hostkey.ser
 # Allure
 .allure
 .agents/rules/java-coding-guide.md
+sample-tui-project-src/

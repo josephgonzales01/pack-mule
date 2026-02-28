@@ -1,6 +1,6 @@
 # Pack Mule — MuleSoft Project Initializer TUI
 
-> A terminal user interface (TUI) for scaffolding MuleSoft Anypoint projects — inspired by Spring Initializr, powered by [TamboUI](https://tamboui.dev), and driven entirely by FreeMarker templates.
+> A terminal user interface (TUI) for scaffolding MuleSoft Anypoint projects — inspired by Spring Initializr, powered by [TamboUI](https://tamboui.dev), and driven entirely by JMustache templates.
 
 ---
 
@@ -30,26 +30,11 @@ Every organisation has their own Mule coding standards, but getting developers t
 
 Pack Mule solves this by letting you **select exactly the capabilities your project needs from the start**. Instead of manually copying boilerplate XML flows and hunting for connector dependency coordinates, you launch a TUI in your terminal, answer a few questions, toggle the modules you need, and get a **fully scaffolded, ready-to-import Anypoint Studio project in seconds** — with your organisation's standards already baked in.
 
-```
-╔══════════════════════════════════════════════════════╗
-║            🔧  Pack Mule — Project Initializer       ║
-╠══════════════════════════════════════════════════════╣
-║  Project Name  : [customer-order-api              ]  ║
-║  Group ID      : [com.acme                        ]  ║
-║  Mule Runtime  : [ 4.6.0 ▼]                         ║
-║  Project Type  : [ RESTful API ▼]                    ║
-║                                                      ║
-║  Capabilities (space to toggle):                     ║
-║  [x] HTTP Listener      [ ] Database (JDBC)          ║
-║  [x] APIkit Router      [x] Error Handling           ║
-║  [ ] Salesforce         [ ] File / FTP               ║
-║  [ ] Kafka / AMQ        [ ] Scheduler / Batch        ║
-║                                                      ║
-║          [ Generate Project ]   [ Cancel ]           ║
-╚══════════════════════════════════════════════════════╝
-```
+![Project Info Screen](src/main/resources/docs/projectInfoScreen.jpg)
 
-All project files — `pom.xml`, Mule XML flows, `log4j2.xml`, and property placeholders — are generated from [FreeMarker](https://freemarker.apache.org/) templates bundled inside the application. Generation is fast, fully offline, and requires no external tooling to scaffold.
+![Capabilities Screen](src/main/resources/docs/CapabilitiesScreen.jpg)
+
+All project files — `pom.xml`, Mule XML flows, `log4j2.xml`, and property placeholders — are generated from [JMustache](https://github.com/samskivert/jmustache) templates bundled inside the application. Generation is fast, fully offline, and requires no external tooling to scaffold.
 
 ---
 
@@ -58,8 +43,8 @@ All project files — `pom.xml`, Mule XML flows, `log4j2.xml`, and property plac
 - **Interactive TUI** — keyboard-driven navigation using TamboUI's Toolkit DSL; declarative, component-based screens with automatic focus management and CSS theming via TCSS files.
 - **Spring Initializr-style capability selector** — toggle connectors and modules; the tool automatically injects the correct Maven dependency blocks into the generated `pom.xml`.
 - **Pluggable project types** — RESTful API, Message Subscriber/Publisher, Batch/File Processing, Scheduled Jobs, and more.
-- **Pure FreeMarker generation** — all output files are rendered from `.ftl` templates; no external `mvn archetype:generate` subprocess, no network calls, no Maven daemon required to scaffold.
-- **Configurable via YAML** — a single `pack-mule.yml` controls runtime versions, XML file naming conventions, dependency catalogs, and default values.
+- **Pure JMustache generation** — all output files are rendered from Mustache templates; no external `mvn archetype:generate` subprocess, no network calls, no Maven daemon required to scaffold.
+- **Configurable via YAML** — a single `pack-mule.yml` controls runtime versions, dependency catalogs, and default values.
 - **Separated template layer** — Mule XML flow templates live in their own module, completely decoupled from application logic.
 - **GraalVM native image ready** — compile Pack Mule to a native binary for instant startup with no JVM warm-up.
 - **Post-generation hooks** — run optional shell scripts or Java hooks after generation (e.g., `git init`, copy shared config files).
@@ -74,7 +59,7 @@ All project files — `pom.xml`, Mule XML flows, `log4j2.xml`, and property plac
 | Concern | Decision | Rationale |
 |---|---|---|
 | TUI framework | TamboUI (`tamboui-toolkit` + `tamboui-jline`) | Declarative DSL, TCSS theming, GraalVM native support |
-| Template engine | FreeMarker | Mature, whitespace-safe XML rendering with full conditional and loop support |
+| Template engine | JMustache | Logic-less, whitespace-friendly templates that do not conflict with Mule's native `${var}` syntax |
 | Project scaffolding | `ProjectScaffolder` (pure Java) | Replaces Maven Archetype; in-process, offline, testable |
 | Configuration | SnakeYAML | Human-friendly, no code changes needed to update connector versions |
 | Dependency catalog | Declared in `pack-mule.yml` | Operators can add or version-bump connectors without touching Java |
@@ -93,15 +78,16 @@ ProjectGenerator.generate(UserSelection)
          ├─▶ DependencyResolver.resolve(capabilities)
          │         └─▶ returns List<Dependency> from pack-mule.yml catalog
          │
-         ├─▶ TemplateRenderer.render("pom/pom.xml.ftl", model)
-         │         └─▶ FreeMarker writes pom.xml with only selected <dependency> blocks
          │
-         ├─▶ TemplateRenderer.render("{projectType}/*.xml.ftl", model)
-         │         └─▶ FreeMarker writes Mule flow XML files
+         ├─▶ TemplateRenderer.render("base/pom.xml", model)
+         │         └─▶ JMustache writes pom.xml with only selected <dependency> blocks
+         │
+         ├─▶ TemplateRenderer.render("triggers/{trigger}/*.xml", model)
+         │         └─▶ JMustache writes Mule flow XML files
          │
          ├─▶ ProjectScaffolder.scaffold(spec, renderedFiles)
-         │         └─▶ Creates target directory tree, writes all rendered files
-         │              with names resolved from pack-mule.yml fileNaming rules
+         │         └─▶ Creates target directory tree, evaluates template filenames as expressions
+         │              to produce dynamically named files like customer-order-api-main.xml
          │
          └─▶ PostHookRunner.run(spec)
                    └─▶ Optional shell hooks (git init, etc.)
@@ -116,7 +102,7 @@ ProjectGenerator.generate(UserSelection)
 
 ## Project Types & Auto-Dependencies
 
-When a developer selects a project type and toggles capabilities, `DependencyResolver` builds the full dependency list from `pack-mule.yml` and `TemplateRenderer` injects only the selected ones into `pom.xml` via a FreeMarker `<#list>` block — no manual copy-paste required.
+When a developer selects a project type and toggles capabilities, `DependencyResolver` builds the full dependency list from `pack-mule.yml` and `TemplateRenderer` injects only the selected ones into `pom.xml` via a Mustache `{{#selectedDependencies}}` block — no manual copy-paste required.
 
 | Project Type | Default Capabilities | Common Add-ons |
 |---|---|---|
@@ -129,21 +115,20 @@ When a developer selects a project type and toggles capabilities, `DependencyRes
 
 ## Adding Custom Templates
 
-All output files are FreeMarker (`.ftl`) templates inside the `templates/` module.
-To add a new project type:
+All output files are evaluated as JMustache templates inside the `templates/` module.
+To add a new project capability or trigger:
 
-1. Create a folder under `templates/src/main/resources/templates/` (e.g., `websocket/`).
-2. Add `.xml.ftl` files. The following variables are available in every template:
+1. Create a folder under `templates/src/main/resources/templates/capabilities/` (e.g., `WEBSOCKET/`).
+2. Add `.xml` or `.yaml` files. Variables are evaluated using Mustache syntax: `{{variable}}`. The following variables are available in every template:
 
 ```
-${projectName}               → "customer-order-api"
-${groupId}                   → "com.acme"
-${muleVersion}               → "4.6.0"
-${capabilities}              → List<Capability>
-${hasCapability("DATABASE")} → true / false
+{{projectName}}               → "customer-order-api"
+{{groupId}}                   → "com.acme"
+{{muleVersion}}               → "4.6.0"
+{{#selectedDependencies}}     → Used to iterate over injected dependencies
 ```
 
-3. Register the new type in `pack-mule.yml` under `projectTypes` with a `templateDir` pointing at your folder.
+3. Register the new capability in `pack-mule.yml` under `capabilities`.
 4. No Java changes required.
 
 ---

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+
+    <flow name="{{projectName}}-scheduler-trigger" doc:id="{{projectName}}-scheduler-trigger">
+        <scheduler doc:name="Scheduler">
+            <scheduling-strategy >
+                <fixed-frequency frequency="1" timeUnit="HOURS"/>
+            </scheduling-strategy>
+        </scheduler>
+        <logger level="INFO" doc:name="Log Entry" message="Scheduler Triggered"/>
+        <!-- Call main flow -->
+        <flow-ref doc:name="Call main flow" name="{{projectName}}-main-flow"/>
+    </flow>
+</mule>

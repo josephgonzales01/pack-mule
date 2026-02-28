@@ -1,9 +1,13 @@
 package dev.sugbo4j.packmule;
 
+import dev.sugbo4j.packmule.generator.ProjectScaffolder;
 import dev.sugbo4j.packmule.model.ProjectConfig;
 import dev.sugbo4j.packmule.tui.CapabilitiesScreen;
 import dev.sugbo4j.packmule.tui.ProjectInfoScreen;
 import dev.sugbo4j.packmule.tui.Theme;
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 import dev.tamboui.tui.event.KeyCode;
 import dev.tamboui.tui.event.KeyEvent;
 import dev.tamboui.toolkit.app.ToolkitApp;
@@ -227,21 +231,54 @@ public class PackMuleApp extends ToolkitApp {
      * This is a placeholder for the actual project generation logic.
      */
     private void generateProject() {
-        // TODO: Implement actual project generation logic
-        System.out.println("\n=== Project Configuration ===");
-        System.out.println("Project Name: " + config.getProjectName());
-        System.out.println("Group ID: " + config.getGroupId());
-        System.out.println("Output Directory: " + config.getOutputDirectory());
-        System.out.println("Mule Runtime: " + config.getMuleRuntime());
-        System.out.println("Java Version: " + config.getJavaVersion());
-        System.out.println("Trigger: " + config.getTrigger());
+        System.out.println("\n=== Generating Project ===");
+        try {
+            // Build the context map
+            Map<String, Object> context = new HashMap<>();
+            context.put("projectName", config.getProjectName());
+            context.put("groupId", config.getGroupId());
+            context.put("muleVersion", config.getMuleRuntime());
+            context.put("javaVersion", config.getJavaVersion());
+            context.put("flowTrigger", config.getTrigger());
 
-        if (config.getQueueType() != null) {
-            System.out.println("Queue Type: " + config.getQueueType());
+            if (config.getQueueType() != null) {
+                context.put("queueType", config.getQueueType());
+            }
+
+            context.put("capabilities", config.getCapabilities());
+
+            // Resolve Dependencies based on capabilities (in a real app, this reads
+            // pack-mule.yaml)
+            java.util.List<Map<String, String>> deps = new java.util.ArrayList<>();
+            if (config.getCapabilities().contains("database")) {
+                Map<String, String> dbDep = new HashMap<>();
+                dbDep.put("groupId", "org.mule.connectors");
+                dbDep.put("artifactId", "mule-db-connector");
+                dbDep.put("version", "1.14.7");
+                deps.add(dbDep);
+            }
+            if (config.getCapabilities().contains("apikit") || "HTTP Listener".equals(config.getTrigger())) {
+                Map<String, String> httpDep = new HashMap<>();
+                httpDep.put("groupId", "org.mule.connectors");
+                httpDep.put("artifactId", "mule-http-connector");
+                httpDep.put("version", "1.9.2");
+                deps.add(httpDep);
+            }
+            context.put("selectedDependencies", deps);
+
+            // Hardcode port for sample
+            context.put("port", "8081");
+
+            File outputDir = new File(config.getOutputDirectory(), config.getProjectName());
+
+            ProjectScaffolder scaffolder = new ProjectScaffolder();
+            scaffolder.scaffold(context, outputDir);
+
+            System.out.println("\nSuccessfully generated project at: " + outputDir.getAbsolutePath());
+        } catch (Exception e) {
+            System.err.println("\nFailed to generate project: " + e.getMessage());
+            e.printStackTrace();
         }
-
-        System.out.println("Capabilities: " + String.join(", ", config.getCapabilities()));
-        System.out.println("=============================\n");
 
         // Exit the application after generation
         quit();

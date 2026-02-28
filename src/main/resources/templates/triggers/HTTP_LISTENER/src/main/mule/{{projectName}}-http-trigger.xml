@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:http="http://www.mulesoft.org/schema/mule/http"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+                          http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+
+    <http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config">
+        <http:listener-connection host="0.0.0.0" port="{{port}}" />
+    </http:listener-config>
+
+    <flow name="{{projectName}}-http-trigger" doc:id="{{projectName}}-http-trigger">
+        <http:listener doc:name="Listener" config-ref="HTTP_Listener_config" path="/api/*"/>
+        <logger level="INFO" doc:name="Log Entry" message="HTTP Request Received"/>
+        <!-- Call main flow -->
+        <flow-ref doc:name="Call main flow" name="{{projectName}}-main-flow"/>
+    </flow>
+</mule>
