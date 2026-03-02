@@ -2,6 +2,9 @@ package dev.sugbo4j.packmule.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.io.InputStream;
+import org.yaml.snakeyaml.Yaml;
 
 /**
  * Mutable state holding the current project configuration for Pack Mule.
@@ -25,9 +28,65 @@ public class ProjectConfig {
     // Additional Capabilities (list of capability keys)
     private List<String> capabilities = new ArrayList<>();
 
-    // Available options (triggers moved to ProjectTriggerAndCapabilities)
-    public static final String[] MULE_RUNTIMES = { "4.9.0", "4.10.0", "4.11.0" };
-    public static final String[] JAVA_VERSIONS = { "11", "17" };
+    // Available options loaded from pack-mule.yaml
+    private List<String> availableMuleRuntimes = new ArrayList<>();
+    private List<String> availableJavaVersions = new ArrayList<>();
+
+    public ProjectConfig() {
+        loadDefaultsFromYaml();
+    }
+
+    @SuppressWarnings("unchecked")
+    private void loadDefaultsFromYaml() {
+        try (InputStream inputStream = getClass().getResourceAsStream("/pack-mule.yaml")) {
+            //  fallback to hardcoded values if pack-mule.yaml is not found
+            if (inputStream == null) {
+                System.err.println("Warning: pack-mule.yaml not found on classpath. Using hardcoded fallbacks.");
+                // Fallbacks
+                availableMuleRuntimes.addAll(List.of("4.9.0", "4.10.0", "4.11.0"));
+                availableJavaVersions.addAll(List.of("11", "17"));
+                return;
+            }
+
+            Yaml yaml = new Yaml();
+            Map<String, Object> config = yaml.load(inputStream);
+
+            // Load defaults
+            if (config.containsKey("defaults")) {
+                Map<String, Object> defaults = (Map<String, Object>) config.get("defaults");
+                this.groupId = (String) defaults.getOrDefault("groupId", "com.mycompany");
+                this.muleRuntime = (String) defaults.getOrDefault("runtime", "4.6.0");
+                this.javaVersion = String.valueOf(defaults.getOrDefault("jdk", "17"));
+            }
+
+            // Load runtimes list
+            if (config.containsKey("runtime")) {
+                List<Map<String, Object>> runtimes = (List<Map<String, Object>>) config.get("runtime");
+                for (Map<String, Object> rt : runtimes) {
+                    availableMuleRuntimes.add((String) rt.get("version"));
+                }
+            }
+
+            // Load jdk list
+            if (config.containsKey("jdk")) {
+                List<Map<String, Object>> jdks = (List<Map<String, Object>>) config.get("jdk");
+                for (Map<String, Object> jdk : jdks) {
+                    availableJavaVersions.add(String.valueOf(jdk.get("version")));
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error loading pack-mule.yaml defaults: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    public List<String> getAvailableMuleRuntimes() {
+        return availableMuleRuntimes;
+    }
+
+    public List<String> getAvailableJavaVersions() {
+        return availableJavaVersions;
+    }
 
     // Getters and Setters
     public String getProjectName() {
@@ -74,8 +133,8 @@ public class ProjectConfig {
      * Get the index of the currently selected Mule runtime.
      */
     public int getMuleRuntimeIndex() {
-        for (int i = 0; i < MULE_RUNTIMES.length; i++) {
-            if (MULE_RUNTIMES[i].equals(muleRuntime)) {
+        for (int i = 0; i < availableMuleRuntimes.size(); i++) {
+            if (availableMuleRuntimes.get(i).equals(muleRuntime)) {
                 return i;
             }
         }
@@ -86,8 +145,8 @@ public class ProjectConfig {
      * Get the index of the currently selected Java version.
      */
     public int getJavaVersionIndex() {
-        for (int i = 0; i < JAVA_VERSIONS.length; i++) {
-            if (JAVA_VERSIONS[i].equals(javaVersion)) {
+        for (int i = 0; i < availableJavaVersions.size(); i++) {
+            if (availableJavaVersions.get(i).equals(javaVersion)) {
                 return i;
             }
         }
@@ -98,8 +157,8 @@ public class ProjectConfig {
      * Set Mule runtime by index.
      */
     public void setMuleRuntimeByIndex(int index) {
-        if (index >= 0 && index < MULE_RUNTIMES.length) {
-            this.muleRuntime = MULE_RUNTIMES[index];
+        if (index >= 0 && index < availableMuleRuntimes.size()) {
+            this.muleRuntime = availableMuleRuntimes.get(index);
         }
     }
 
@@ -107,8 +166,8 @@ public class ProjectConfig {
      * Set Java version by index.
      */
     public void setJavaVersionByIndex(int index) {
-        if (index >= 0 && index < JAVA_VERSIONS.length) {
-            this.javaVersion = JAVA_VERSIONS[index];
+        if (index >= 0 && index < availableJavaVersions.size()) {
+            this.javaVersion = availableJavaVersions.get(index);
         }
     }
 

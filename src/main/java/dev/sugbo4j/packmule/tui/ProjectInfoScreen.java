@@ -121,14 +121,14 @@ public class ProjectInfoScreen {
         switch (focusArea) {
             case MULE_RUNTIME -> {
                 int idx = config.getMuleRuntimeIndex();
-                int newIdx = (idx + direction + ProjectConfig.MULE_RUNTIMES.length)
-                        % ProjectConfig.MULE_RUNTIMES.length;
+                List<String> options = config.getAvailableMuleRuntimes();
+                int newIdx = (idx + direction + options.size()) % options.size();
                 config.setMuleRuntimeByIndex(newIdx);
             }
             case JAVA_VERSION -> {
                 int idx = config.getJavaVersionIndex();
-                int newIdx = (idx + direction + ProjectConfig.JAVA_VERSIONS.length)
-                        % ProjectConfig.JAVA_VERSIONS.length;
+                List<String> options = config.getAvailableJavaVersions();
+                int newIdx = (idx + direction + options.size()) % options.size();
                 config.setJavaVersionByIndex(newIdx);
             }
             case TRIGGER -> {
@@ -226,7 +226,7 @@ public class ProjectInfoScreen {
         return column(
                 renderSectionTitle("      Runtime and JDK Version ", t),
                 text(""),
-                renderRadioGroup("Mule Runtime", ProjectConfig.MULE_RUNTIMES,
+                renderRadioGroup("Mule Runtime", config.getAvailableMuleRuntimes().toArray(new String[0]),
                         config.getMuleRuntimeIndex(), focusArea == FocusArea.MULE_RUNTIME, t),
                 text(""),
                 renderRadioGroup("Java Version", formatJavaVersions(),
@@ -239,9 +239,10 @@ public class ProjectInfoScreen {
      * Format Java versions with "Java " prefix.
      */
     private String[] formatJavaVersions() {
-        String[] versions = new String[ProjectConfig.JAVA_VERSIONS.length];
-        for (int i = 0; i < ProjectConfig.JAVA_VERSIONS.length; i++) {
-            versions[i] = "Java " + ProjectConfig.JAVA_VERSIONS[i];
+        List<String> javaVersions = config.getAvailableJavaVersions();
+        String[] versions = new String[javaVersions.size()];
+        for (int i = 0; i < javaVersions.size(); i++) {
+            versions[i] = "Java " + javaVersions.get(i);
         }
         return versions;
     }
