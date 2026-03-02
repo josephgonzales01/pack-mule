@@ -47,7 +47,6 @@ All project files — `pom.xml`, Mule XML flows, `log4j2.xml`, and property plac
 - **Configurable via YAML** — a single `pack-mule.yml` controls runtime versions, dependency catalogs, and default values.
 - **Separated template layer** — Mule XML flow templates live in their own module, completely decoupled from application logic.
 - **GraalVM native image ready** — compile Pack Mule to a native binary for instant startup with no JVM warm-up.
-- **Post-generation hooks** — run optional shell scripts or Java hooks after generation (e.g., `git init`, copy shared config files).
 
 ---
 
@@ -69,28 +68,27 @@ All project files — `pom.xml`, Mule XML flows, `log4j2.xml`, and property plac
 
 ### Generation Pipeline
 
-```
+```text
 User confirms on SummaryScreen
          │
          ▼
-ProjectGenerator.generate(UserSelection)
+PackMuleApp.generateProject()
          │
-         ├─▶ DependencyResolver.resolve(capabilities)
-         │         └─▶ returns List<Dependency> from pack-mule.yml catalog
+         ├─▶ Builds templateContext Map
+         │         └─▶ Injects user inputs and resolved dependencies
          │
-         │
-         ├─▶ TemplateRenderer.render("base/pom.xml", model)
-         │         └─▶ JMustache writes pom.xml with only selected <dependency> blocks
-         │
-         ├─▶ TemplateRenderer.render("triggers/{trigger}/*.xml", model)
-         │         └─▶ JMustache writes Mule flow XML files
-         │
-         ├─▶ ProjectScaffolder.scaffold(spec, renderedFiles)
-         │         └─▶ Creates target directory tree, evaluates template filenames as expressions
-         │              to produce dynamically named files like customer-order-api-main.xml
-         │
-         └─▶ PostHookRunner.run(spec)
-                   └─▶ Optional shell hooks (git init, etc.)
+         └─▶ ProjectScaffolder.scaffold(context, outputDir)
+                   │
+                   ├─▶ Navigates /templates/base
+                   ├─▶ Navigates /templates/triggers/{triggerId}
+                   ├─▶ Navigates /templates/capabilities/{capabilityId}
+                   │
+                   └─▶ For each file found:
+                             ├─▶ TemplateRenderer.evaluateExpression(filename)
+                             │         └─▶ Resolves dynamic paths (e.g., {{projectName}}-main.xml)
+                             │
+                             └─▶ TemplateRenderer.renderClasspathTemplate(content)
+                                       └─▶ JMustache evaluates variables and writes to target directory
 ```
 
 
@@ -124,7 +122,7 @@ To add a new project capability or trigger:
 ```
 {{projectName}}               → "customer-order-api"
 {{groupId}}                   → "com.acme"
-{{muleVersion}}               → "4.6.0"
+{{muleVersion}}               → "4.9.0"
 {{#selectedDependencies}}     → Used to iterate over injected dependencies
 ```
 
