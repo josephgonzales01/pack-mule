@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.io.InputStream;
-import org.yaml.snakeyaml.Yaml;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 /**
  * Mutable state holding the current project configuration for Pack Mule.
@@ -39,7 +40,7 @@ public class ProjectConfig {
     @SuppressWarnings("unchecked")
     private void loadDefaultsFromYaml() {
         try (InputStream inputStream = getClass().getResourceAsStream("/pack-mule.yaml")) {
-            //  fallback to hardcoded values if pack-mule.yaml is not found
+            // fallback to hardcoded values if pack-mule.yaml is not found
             if (inputStream == null) {
                 System.err.println("Warning: pack-mule.yaml not found on classpath. Using hardcoded fallbacks.");
                 // Fallbacks
@@ -48,8 +49,8 @@ public class ProjectConfig {
                 return;
             }
 
-            Yaml yaml = new Yaml();
-            Map<String, Object> config = yaml.load(inputStream);
+            ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+            Map<String, Object> config = mapper.readValue(inputStream, Map.class);
 
             // Load defaults
             if (config.containsKey("defaults")) {
