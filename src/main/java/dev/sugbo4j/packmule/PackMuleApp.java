@@ -63,14 +63,9 @@ public class PackMuleApp extends ToolkitApp {
             return EventResult.HANDLED;
         }
 
-        // Q - Quit/Cancel (works on both screens)
-        if (event.isCharIgnoreCase('q')) {
-            if (currentScreen == 1 && projectInfoScreen.isTextFieldFocused()) {
-                // Don't quit if in text field on screen 1
-            } else {
-                quit();
-                return EventResult.HANDLED;
-            }
+        if (event.code() == KeyCode.ESCAPE) {
+            quit();
+            return EventResult.HANDLED;
         }
 
         // Screen 1 specific event handling
@@ -90,20 +85,6 @@ public class PackMuleApp extends ToolkitApp {
      * Handle keyboard events for Screen 1 (Project Info).
      */
     private EventResult handleScreen1KeyEvent(KeyEvent event) {
-        // Tab / Shift+Tab — Navigate focus
-        if (event.isFocusNext() || event.isKey(KeyCode.TAB)) {
-            if (event.hasShift()) {
-                projectInfoScreen.focusPrevious();
-            } else {
-                projectInfoScreen.focusNext();
-            }
-            return EventResult.HANDLED;
-        }
-        if (event.isFocusPrevious()) {
-            projectInfoScreen.focusPrevious();
-            return EventResult.HANDLED;
-        }
-
         // Arrow keys — Up/Down navigate between fields, Left/Right cycle radio options
         if (event.isUp()) {
             if (projectInfoScreen.isVerticalListFocused()) {
@@ -140,18 +121,13 @@ public class PackMuleApp extends ToolkitApp {
             return EventResult.HANDLED;
         }
 
-        // n / N - Next (if trigger selected)
-        if (event.isCharIgnoreCase('n')) {
+        // Page Down - Next (if trigger selected)
+        if (event.code() == KeyCode.PAGE_DOWN) {
             if (config.getTriggerIndex() != -1) {
                 currentScreen = 2;
+                capabilitiesScreen.resetFocus();
                 return EventResult.HANDLED;
             }
-        }
-
-        // c — Clear current text field
-        if (event.isCharIgnoreCase('c') && projectInfoScreen.isTextFieldFocused()) {
-            projectInfoScreen.clearCurrentField();
-            return EventResult.HANDLED;
         }
 
         // Backspace — Delete char in text fields
@@ -163,7 +139,10 @@ public class PackMuleApp extends ToolkitApp {
         // Character input for text fields
         if (projectInfoScreen.isTextFieldFocused()) {
             char c = event.character();
-            if (c >= 32 && c < 127) {
+            // Prevent terminal artifacts like ^H (0x08 == 8) from rendering when backspace
+            // is passed through to character block.
+            // 8 == backspace and 127 == DEL in ASCII
+            if (c >= 32 && c < 127 && event.code() != KeyCode.BACKSPACE) {
                 projectInfoScreen.handleChar(c);
                 return EventResult.HANDLED;
             }
@@ -176,27 +155,21 @@ public class PackMuleApp extends ToolkitApp {
      * Handle keyboard events for Screen 2 (Capabilities).
      */
     private EventResult handleScreen2KeyEvent(KeyEvent event) {
-        // Tab / Shift+Tab — Navigate between sections
-        if (event.isFocusNext() || event.isKey(KeyCode.TAB)) {
-            if (event.hasShift()) {
-                capabilitiesScreen.focusPrevious();
-            } else {
-                capabilitiesScreen.focusNext();
-            }
-            return EventResult.HANDLED;
-        }
-        if (event.isFocusPrevious()) {
-            capabilitiesScreen.focusPrevious();
-            return EventResult.HANDLED;
-        }
-
-        // Arrow keys — Up/Down navigate within lists
+        // Arrow keys — Up/Down navigate within lists, Left/Right swap focus sections
         if (event.isUp()) {
             capabilitiesScreen.moveUp();
             return EventResult.HANDLED;
         }
         if (event.isDown()) {
             capabilitiesScreen.moveDown();
+            return EventResult.HANDLED;
+        }
+        if (event.isLeft()) {
+            capabilitiesScreen.focusPrevious();
+            return EventResult.HANDLED;
+        }
+        if (event.isRight()) {
+            capabilitiesScreen.focusNext();
             return EventResult.HANDLED;
         }
 
@@ -209,14 +182,14 @@ public class PackMuleApp extends ToolkitApp {
             return EventResult.HANDLED;
         }
 
-        // b / B - Back to screen 1
-        if (event.isCharIgnoreCase('b')) {
+        // PAGE_UP - Back to screen 1
+        if (event.code() == KeyCode.PAGE_UP) {
             currentScreen = 1;
             return EventResult.HANDLED;
         }
 
-        // g / G - Generate project
-        if (event.isCharIgnoreCase('g')) {
+        // F9 - Generate project
+        if (event.code() == KeyCode.F9) {
             if (capabilitiesScreen.canGenerate()) {
                 generateProject();
                 return EventResult.HANDLED;

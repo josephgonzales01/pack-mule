@@ -61,6 +61,14 @@ public class CapabilitiesScreen {
     }
 
     /**
+     * Resets the focus area based on the current configuration state.
+     * Should be called when navigating to this screen.
+     */
+    public void resetFocus() {
+        this.focusArea = isQueueTypeSectionVisible() ? FocusArea.QUEUE_TYPE : FocusArea.CAPABILITIES;
+    }
+
+    /**
      * Move focus to the next field.
      */
     public void focusNext() {
@@ -316,11 +324,11 @@ public class CapabilitiesScreen {
                 text(" Move  ").fg(t.textDim()),
                 renderKeyBadge("Space", t),
                 text(" Toggle / Select  ").fg(t.textDim()),
-                canGen ? renderKeyBadge("G", t) : text("[G]").fg(t.textDim()),
+                canGen ? renderKeyBadge("F9", t) : text("[F9]").fg(t.textDim()),
                 text(" Generate  ").fg(t.textDim()),
-                renderKeyBadge("B", t),
+                renderKeyBadge("PgUp", t),
                 text(" Back  ").fg(t.textDim()),
-                renderKeyBadge("Q", t),
+                renderKeyBadge("ESC", t),
                 text(" Cancel").fg(t.textDim()),
                 spacer()).length(1);
     }

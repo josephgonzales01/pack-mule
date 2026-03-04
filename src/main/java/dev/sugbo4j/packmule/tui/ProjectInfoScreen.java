@@ -353,17 +353,12 @@ public class ProjectInfoScreen {
                 text("  "),
                 renderKeyBadge("↑↓←→", t),
                 text(" Move  ").fg(t.textDim()),
-                renderKeyBadge("Tab", t),
-                text(" Next Field  ").fg(t.textDim()),
                 renderKeyBadge("Space", t),
                 text(" Select  ").fg(t.textDim()),
-                renderKeyBadge("c", t),
-                text(" Clear  ").fg(t.textDim()),
-
-                triggerSelected ? renderKeyBadge("N", t) : text("[N]").fg(t.textDim()),
+                triggerSelected ? renderKeyBadge("PgDn", t) : text("[PgDn]").fg(t.textDim()),
                 triggerSelected ? text(" Next  ").fg(t.textDim()) : text(" Next  ").fg(t.textDim()),
 
-                renderKeyBadge("Q", t),
+                renderKeyBadge("ESC", t),
                 text(" Cancel").fg(t.textDim()),
                 spacer()).length(1);
     }

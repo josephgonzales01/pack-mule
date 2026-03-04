@@ -60,7 +60,7 @@ All project files — `pom.xml`, Mule XML flows, `log4j2.xml`, and property plac
 | TUI framework | TamboUI (`tamboui-toolkit` + `tamboui-jline`) | Declarative DSL, TCSS theming, GraalVM native support |
 | Template engine | JMustache | Logic-less, whitespace-friendly templates that do not conflict with Mule's native `${var}` syntax |
 | Project scaffolding | `ProjectScaffolder` (pure Java) | Replaces Maven Archetype; in-process, offline, testable |
-| Configuration | SnakeYAML | Human-friendly, no code changes needed to update connector versions |
+| Configuration | micronaut-serde | Human-friendly, no code changes needed to update connector versions |
 | Dependency catalog | Declared in `pack-mule.yml` | Operators can add or version-bump connectors without touching Java |
 | Distribution | Fat JAR + optional GraalVM native | Fat JAR for simplicity; native binary for CI/CD agent use |
 
