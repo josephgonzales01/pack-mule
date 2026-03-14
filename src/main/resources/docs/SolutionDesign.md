@@ -17,10 +17,19 @@ Pack Mule is driven entirely by [JMustache](https://github.com/samskivert/jmusta
 ### The Generation Pipeline
 
 ```text
-User confirms on SummaryScreen
+User launches PackMuleApp
+         │
+         ▼
+ConfigurationLoader parses pack-mule.yaml into PackMuleConfig
+         │
+         ▼
+User confirms selections on SummaryScreen
          │
          ▼
 PackMuleApp.generateProject()
+         │
+         ├─▶ DependencyResolver.resolveDependencies()
+         │         └─▶ Reads required dependencies from catalog for selected triggers and capabilities
          │
          ├─▶ Builds templateContext Map
          │         └─▶ Injects user inputs and resolved dependencies

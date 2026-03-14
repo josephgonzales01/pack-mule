@@ -1,12 +1,14 @@
 package dev.sugbo4j.packmule;
 
 import dev.sugbo4j.packmule.generator.ProjectScaffolder;
+import dev.sugbo4j.packmule.generator.DependencyResolver;
 import dev.sugbo4j.packmule.model.ProjectConfig;
 import dev.sugbo4j.packmule.tui.CapabilitiesScreen;
 import dev.sugbo4j.packmule.tui.ProjectInfoScreen;
 import dev.sugbo4j.packmule.tui.Theme;
 import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import dev.tamboui.tui.event.KeyCode;
 import dev.tamboui.tui.event.KeyEvent;
@@ -220,23 +222,9 @@ public class PackMuleApp extends ToolkitApp {
 
             context.put("capabilities", config.getCapabilities());
 
-            // Resolve Dependencies based on capabilities (in a real app, this reads
-            // pack-mule.yaml)
-            java.util.List<Map<String, String>> deps = new java.util.ArrayList<>();
-            if (config.getCapabilities().contains("database")) {
-                Map<String, String> dbDep = new HashMap<>();
-                dbDep.put("groupId", "org.mule.connectors");
-                dbDep.put("artifactId", "mule-db-connector");
-                dbDep.put("version", "1.14.7");
-                deps.add(dbDep);
-            }
-            if (config.getCapabilities().contains("apikit") || "HTTP Listener".equals(config.getTrigger())) {
-                Map<String, String> httpDep = new HashMap<>();
-                httpDep.put("groupId", "org.mule.connectors");
-                httpDep.put("artifactId", "mule-http-connector");
-                httpDep.put("version", "1.9.2");
-                deps.add(httpDep);
-            }
+            // Resolve dependencies from pack-mule.yaml dynamically
+            DependencyResolver dependencyResolver = new DependencyResolver();
+            List<Map<String, String>> deps = dependencyResolver.resolveDependencies(config);
             context.put("selectedDependencies", deps);
 
             // Hardcode port for sample
