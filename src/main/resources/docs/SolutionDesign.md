@@ -38,7 +38,7 @@ PackMuleApp.generateProject()
                              └─▶ TemplateRenderer.renderClasspathTemplate(content)
                                        └─▶ JMustache evaluates variables and writes to target directory
 ```
-*Note: Full dynamic parsing of dependencies directly from `pack-mule.yaml` is part of the planned architecture, but currently prototyped directly in `PackMuleApp`.*
+*Note: The `DependencyResolver` dynamically parses dependencies directly from `pack-mule.yaml` based on the user's selected capabilities and triggers, injecting the correct Maven coordinates into the Mustache context.*
 
 ### State Management & User Inputs
 When the user selects their project name, triggers, and capabilities in the TUI, the Java controller collects these answers into a generic `Map<String, Object> context`. 
