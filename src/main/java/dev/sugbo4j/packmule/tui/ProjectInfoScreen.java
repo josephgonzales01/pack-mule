@@ -1,7 +1,7 @@
 package dev.sugbo4j.packmule.tui;
 
 import dev.sugbo4j.packmule.model.ProjectConfig;
-import dev.sugbo4j.packmule.model.ProjectTriggerAndCapabilities;
+import dev.sugbo4j.packmule.model.config.TriggerConfig;
 import dev.tamboui.toolkit.element.Element;
 
 import java.util.ArrayList;
@@ -133,11 +133,11 @@ public class ProjectInfoScreen {
             }
             case TRIGGER -> {
                 int idx = config.getTriggerIndex();
+                List<TriggerConfig> triggers = config.getAvailableTriggers();
                 if (idx == -1) {
-                    config.setTriggerByIndex(direction > 0 ? 0 : ProjectTriggerAndCapabilities.TRIGGERS.length - 1);
+                    config.setTriggerByIndex(direction > 0 ? 0 : triggers.size() - 1);
                 } else {
-                    int newIdx = (idx + direction + ProjectTriggerAndCapabilities.TRIGGERS.length)
-                            % ProjectTriggerAndCapabilities.TRIGGERS.length;
+                    int newIdx = (idx + direction + triggers.size()) % triggers.size();
                     config.setTriggerByIndex(newIdx);
                 }
             }
@@ -321,10 +321,11 @@ public class ProjectInfoScreen {
         boolean isListFocused = (focusArea == FocusArea.TRIGGER);
         int selectedIndex = config.getTriggerIndex();
 
-        for (int i = 0; i < ProjectTriggerAndCapabilities.TRIGGERS.length; i++) {
+        List<TriggerConfig> availableTriggers = config.getAvailableTriggers();
+        for (int i = 0; i < availableTriggers.size(); i++) {
             boolean isSelected = (i == selectedIndex);
             String marker = isSelected ? "(●) " : "( ) ";
-            String optText = "  " + marker + ProjectTriggerAndCapabilities.TRIGGERS[i];
+            String optText = "  " + marker + availableTriggers.get(i).label();
 
             if (isListFocused && isSelected) {
                 elements.add(text(optText).fg(t.primary()).bold());

@@ -1,8 +1,8 @@
 package dev.sugbo4j.packmule.tui;
 
 import dev.sugbo4j.packmule.model.ProjectConfig;
-import dev.sugbo4j.packmule.model.ProjectTriggerAndCapabilities;
 import dev.sugbo4j.packmule.model.QueueType;
+import dev.sugbo4j.packmule.model.config.CapabilityConfig;
 import dev.tamboui.toolkit.element.Element;
 
 import java.util.ArrayList;
@@ -50,7 +50,7 @@ public class CapabilitiesScreen {
      * Check if the Queue Type section should be displayed.
      */
     public boolean isQueueTypeSectionVisible() {
-        return "Messaging / Queue".equals(config.getTrigger());
+        return "ANYPOINT_MQ".equals(config.getTrigger());
     }
 
     /**
@@ -100,9 +100,8 @@ public class CapabilitiesScreen {
             config.setQueueTypeByIndex(focusedQueueTypeIndex);
         } else {
             // Move up in capabilities list
-            focusedCapabilityIndex = (focusedCapabilityIndex - 1
-                    + ProjectTriggerAndCapabilities.CAPABILITY_LABELS.length)
-                    % ProjectTriggerAndCapabilities.CAPABILITY_LABELS.length;
+            int capabilitiesCount = config.getAvailableCapabilities().size();
+            focusedCapabilityIndex = (focusedCapabilityIndex - 1 + capabilitiesCount) % capabilitiesCount;
         }
     }
 
@@ -121,8 +120,8 @@ public class CapabilitiesScreen {
             config.setQueueTypeByIndex(focusedQueueTypeIndex);
         } else {
             // Move down in capabilities list
-            focusedCapabilityIndex = (focusedCapabilityIndex + 1)
-                    % ProjectTriggerAndCapabilities.CAPABILITY_LABELS.length;
+            int capabilitiesCount = config.getAvailableCapabilities().size();
+            focusedCapabilityIndex = (focusedCapabilityIndex + 1) % capabilitiesCount;
         }
     }
 
@@ -131,8 +130,9 @@ public class CapabilitiesScreen {
      */
     public void toggleCurrentCapability() {
         if (focusArea == FocusArea.CAPABILITIES) {
-            String key = ProjectTriggerAndCapabilities.getCapabilityKey(focusedCapabilityIndex);
-            if (key != null) {
+            List<CapabilityConfig> caps = config.getAvailableCapabilities();
+            if (focusedCapabilityIndex >= 0 && focusedCapabilityIndex < caps.size()) {
+                String key = caps.get(focusedCapabilityIndex).id();
                 config.toggleCapability(key);
             }
         }
@@ -255,10 +255,13 @@ public class CapabilitiesScreen {
 
         boolean isListFocused = (focusArea == FocusArea.CAPABILITIES);
 
-        for (int i = 0; i < ProjectTriggerAndCapabilities.CAPABILITY_LABELS.length; i++) {
-            String key = ProjectTriggerAndCapabilities.CAPABILITY_KEYS[i];
-            String label = ProjectTriggerAndCapabilities.CAPABILITY_LABELS[i];
-            String description = ProjectTriggerAndCapabilities.CAPABILITY_DESCRIPTIONS[i];
+        List<CapabilityConfig> availableCapabilities = config.getAvailableCapabilities();
+
+        for (int i = 0; i < availableCapabilities.size(); i++) {
+            CapabilityConfig cap = availableCapabilities.get(i);
+            String key = cap.id();
+            String label = cap.label();
+            String description = cap.category() != null ? cap.category() : "";
 
             boolean isChecked = config.hasCapability(key);
             boolean isFocused = (isListFocused && i == focusedCapabilityIndex);

@@ -2,10 +2,11 @@ package dev.sugbo4j.packmule.model;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.io.InputStream;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+
+import dev.sugbo4j.packmule.model.config.CapabilityConfig;
+import dev.sugbo4j.packmule.model.config.ConfigurationLoader;
+import dev.sugbo4j.packmule.model.config.PackMuleConfig;
+import dev.sugbo4j.packmule.model.config.TriggerConfig;
 
 /**
  * Mutable state holding the current project configuration for Pack Mule.
@@ -13,15 +14,17 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
  */
 public class ProjectConfig {
 
+    private final PackMuleConfig packMuleConfig;
+
     // Project Information
     private String projectName = "";
-    private String groupId = "com.mycompany";
+    private String groupId;
     private String outputDirectory = ".";
 
     // Runtime and JDK Version
-    private String muleRuntime = "4.6.0";
-    private String javaVersion = "11";
-    private String trigger = null;
+    private String muleRuntime;
+    private String javaVersion;
+    private TriggerConfig trigger = null;
 
     // Queue Type (only applicable when trigger = "Messaging / Queue")
     private String queueType = null;
@@ -34,51 +37,23 @@ public class ProjectConfig {
     private List<String> availableJavaVersions = new ArrayList<>();
 
     public ProjectConfig() {
-        loadDefaultsFromYaml();
+        // Load dynamically from yaml
+        this.packMuleConfig = ConfigurationLoader.loadFromClasspath("/pack-mule.yaml");
+        
+        // Defaults
+        this.groupId = packMuleConfig.defaults().groupId();
+        this.muleRuntime = packMuleConfig.defaults().runtime();
+        this.javaVersion = packMuleConfig.defaults().jdk();
+
+        // Load runtimes
+        packMuleConfig.runtime().forEach(rt -> availableMuleRuntimes.add(rt.version()));
+        
+        // Load jdks
+        packMuleConfig.jdk().forEach(jdk -> availableJavaVersions.add(jdk.version()));
     }
 
-    @SuppressWarnings("unchecked")
-    private void loadDefaultsFromYaml() {
-        try (InputStream inputStream = getClass().getResourceAsStream("/pack-mule.yaml")) {
-            // fallback to hardcoded values if pack-mule.yaml is not found
-            if (inputStream == null) {
-                System.err.println("Warning: pack-mule.yaml not found on classpath. Using hardcoded fallbacks.");
-                // Fallbacks
-                availableMuleRuntimes.addAll(List.of("4.9.0", "4.10.0", "4.11.0"));
-                availableJavaVersions.addAll(List.of("11", "17"));
-                return;
-            }
-
-            ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-            Map<String, Object> config = mapper.readValue(inputStream, Map.class);
-
-            // Load defaults
-            if (config.containsKey("defaults")) {
-                Map<String, Object> defaults = (Map<String, Object>) config.get("defaults");
-                this.groupId = (String) defaults.getOrDefault("groupId", "com.mycompany");
-                this.muleRuntime = (String) defaults.getOrDefault("runtime", "4.6.0");
-                this.javaVersion = String.valueOf(defaults.getOrDefault("jdk", "17"));
-            }
-
-            // Load runtimes list
-            if (config.containsKey("runtime")) {
-                List<Map<String, Object>> runtimes = (List<Map<String, Object>>) config.get("runtime");
-                for (Map<String, Object> rt : runtimes) {
-                    availableMuleRuntimes.add((String) rt.get("version"));
-                }
-            }
-
-            // Load jdk list
-            if (config.containsKey("jdk")) {
-                List<Map<String, Object>> jdks = (List<Map<String, Object>>) config.get("jdk");
-                for (Map<String, Object> jdk : jdks) {
-                    availableJavaVersions.add(String.valueOf(jdk.get("version")));
-                }
-            }
-        } catch (Exception e) {
-            System.err.println("Error loading pack-mule.yaml defaults: " + e.getMessage());
-            e.printStackTrace();
-        }
+    public PackMuleConfig getPackMuleConfig() {
+        return packMuleConfig;
     }
 
     public List<String> getAvailableMuleRuntimes() {
@@ -87,6 +62,14 @@ public class ProjectConfig {
 
     public List<String> getAvailableJavaVersions() {
         return availableJavaVersions;
+    }
+
+    public List<TriggerConfig> getAvailableTriggers() {
+        return packMuleConfig.triggers();
+    }
+
+    public List<CapabilityConfig> getAvailableCapabilities() {
+        return packMuleConfig.capabilities();
     }
 
     // Getters and Setters
@@ -173,10 +156,14 @@ public class ProjectConfig {
     }
 
     public String getTrigger() {
+        return trigger != null ? trigger.id() : null;
+    }
+
+    public TriggerConfig getTriggerConfig() {
         return trigger;
     }
 
-    public void setTrigger(String trigger) {
+    public void setTrigger(TriggerConfig trigger) {
         this.trigger = trigger;
     }
 
@@ -185,15 +172,25 @@ public class ProjectConfig {
      * Returns -1 if no trigger is selected.
      */
     public int getTriggerIndex() {
-        return ProjectTriggerAndCapabilities.getTriggerIndex(trigger);
+        if (trigger == null) {
+            return -1;
+        }
+        List<TriggerConfig> triggers = getAvailableTriggers();
+        for (int i = 0; i < triggers.size(); i++) {
+            if (triggers.get(i).id().equals(trigger.id())) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     /**
      * Set Trigger by index.
      */
     public void setTriggerByIndex(int index) {
-        if (index >= 0 && index < ProjectTriggerAndCapabilities.TRIGGERS.length) {
-            this.trigger = ProjectTriggerAndCapabilities.TRIGGERS[index];
+        List<TriggerConfig> triggers = getAvailableTriggers();
+        if (index >= 0 && index < triggers.size()) {
+            this.trigger = triggers.get(index);
         } else if (index == -1) {
             this.trigger = null;
         }
@@ -214,7 +211,11 @@ public class ProjectConfig {
      * Returns -1 if no queue type is selected.
      */
     public int getQueueTypeIndex() {
-        return ProjectTriggerAndCapabilities.getQueueTypeIndex(queueType);
+        if (queueType == null) {
+            return -1;
+        }
+        QueueType type = QueueType.fromDisplayName(queueType);
+        return type != null ? type.ordinal() : -1;
     }
 
     /**
@@ -233,7 +234,7 @@ public class ProjectConfig {
      * Check if the current trigger requires a queue type selection.
      */
     public boolean isQueueTypeRequired() {
-        return "Messaging / Queue".equals(trigger);
+        return "ANYPOINT_MQ".equals(getTrigger());
     }
 
     // ========== Capabilities ==========
@@ -268,6 +269,6 @@ public class ProjectConfig {
      * Check if the trigger implies Anypoint MQ (when queue type is Anypoint MQ).
      */
     public boolean isAnypointMQFromTrigger() {
-        return "Anypoint MQ".equals(queueType);
+        return "ANYPOINT_MQ".equals(getTrigger());
     }
 }
