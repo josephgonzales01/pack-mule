@@ -129,6 +129,23 @@ To add a new project capability or trigger:
 3. Register the new capability in `pack-mule.yml` under `capabilities`.
 4. No Java changes required.
 
+### Overriding Templates at Runtime
+
+Organisations can ship **custom templates alongside the JAR**. Pack Mule checks for an external `templates/` folder in the current working directory before falling back to the built-in templates.
+
+```bash
+my-org-workspace/
+├── pack-mule-app.jar
+└── templates/
+    ├── base/                            # Override built-in base templates
+    └── capabilities/
+        └── DATABASE/                    # Override just this capability
+            └── src/main/mule/
+                └── {{projectName}}-db-common-flow.xml
+```
+
+Run the jar from that directory and Pack Mule picks up your templates automatically. Any sub-directory not present externally still falls back to the built-in classpath version.
+
 ---
 
 ## Getting Started

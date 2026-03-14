@@ -6,6 +6,7 @@ import com.samskivert.mustache.Template;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.Map;
 
 /**
@@ -39,6 +40,18 @@ public class TemplateRenderer {
             if (is == null) {
                 throw new IllegalArgumentException("Template not found: " + fullPath);
             }
+            try (InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
+                Template template = compiler.compile(reader);
+                return template.execute(context);
+            }
+        }
+    }
+
+    /**
+     * Renders a template from an external file path with the given model map.
+     */
+    public String renderFileTemplate(Path filePath, Map<String, Object> context) throws Exception {
+        try (InputStream is = java.nio.file.Files.newInputStream(filePath)) {
             try (InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
                 Template template = compiler.compile(reader);
                 return template.execute(context);

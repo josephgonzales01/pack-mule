@@ -170,6 +170,35 @@ To introduce a new capability or trigger:
 3. Ensure the capability or trigger ID is registered in `pack-mule.yaml`.
 4. Register any necessary dependencies to the Dependency Catalog.
 
+### Overriding Templates at Runtime (External Template Directory)
+
+Organizations can provide completely custom templates. Pack Mule checks for an external `templates/` directory in the working directory before falling back to the built-in templates.
+
+**Priority (highest to lowest):**
+1. `<working-dir>/templates/<subdir>` — external filesystem directory placed next to the JAR
+2. Built-in classpath templates bundled inside the JAR
+
+**Example:**
+```bash
+my-org-workspace/
+├── pack-mule-app.jar
+└── templates/
+    ├── base/                                  # Override base templates
+    │   └── src/main/mule/
+    │       └── {{projectName}}-main.xml       # Your org's custom main flow
+    └── capabilities/
+        └── DATABASE/
+            └── src/main/mule/
+                └── {{projectName}}-db-common-flow.xml
+```
+
+Then run from that directory:
+```bash
+java -jar pack-mule-app.jar
+```
+
+Pack Mule will use the files from `templates/` on the filesystem and fall back to its built-in templates for any sub-directories not present externally. No recompilation or JAR modification required.
+
 ### Configuring the Dependency Catalog
 The dependency catalog tells Pack Mule how to populate the `<dependencies>` section of the generated `pom.xml`. Operators can version-bump connectors for the whole organization in one place.
 

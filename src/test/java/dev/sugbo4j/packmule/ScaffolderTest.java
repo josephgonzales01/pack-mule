@@ -1,13 +1,13 @@
 package dev.sugbo4j.packmule;
 
 import dev.sugbo4j.packmule.generator.ProjectScaffolder;
-import dev.sugbo4j.packmule.model.ProjectConfig;
 
 import java.io.File;
-import java.nio.file.Files;
+import java.io.FileWriter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -22,8 +22,8 @@ public class ScaffolderTest {
         context.put("groupId", "com.test");
         context.put("muleVersion", "4.6.0");
         context.put("port", "8085");
-        context.put("flowTrigger", "HTTP Listener");
-        context.put("capabilities", Arrays.asList("Database (JDBC)"));
+        context.put("flowTrigger", "HTTP_LISTENER");
+        context.put("capabilities", Arrays.asList("DATABASE"));
 
         // Add dummy dependencies
         Map<String, String> dep1 = new HashMap<>();
@@ -45,7 +45,45 @@ public class ScaffolderTest {
         outputDir.mkdirs();
 
         scaffolder.scaffold(context, outputDir);
+        
+        // Assert that base templates were created
+        File mainXml = new File(outputDir, "src/main/mule/test-project-main.xml");
+        assertTrue(mainXml.exists(), "Base template main XML should be created");
+        
         System.out.println("Test generation finished at: " + outputDir.getAbsolutePath());
+    }
+
+    @Test
+    public void testExternalTemplates() throws Exception {
+        // Create an external template directory
+        File extBaseDir = new File("templates/base");
+        extBaseDir.mkdirs();
+        File extTemplate = new File(extBaseDir, "hello.txt");
+        try (FileWriter fw = new FileWriter(extTemplate)) {
+            fw.write("Hello {{projectName}} from external template!");
+        }
+
+        try {
+            ProjectScaffolder scaffolder = new ProjectScaffolder();
+            Map<String, Object> context = new HashMap<>();
+            context.put("projectName", "ext-project");
+
+            File outputDir = new File("c:/tmp/ext-test-output");
+            if (outputDir.exists()) {
+                deleteDirectory(outputDir);
+            }
+            outputDir.mkdirs();
+
+            scaffolder.scaffold(context, outputDir);
+
+            // Assert that external template was used
+            File generatedFile = new File(outputDir, "hello.txt");
+            assertTrue(generatedFile.exists(), "External template file should be rendered");
+
+        } finally {
+            // Clean up external templates
+            deleteDirectory(new File("templates"));
+        }
     }
 
     private static void deleteDirectory(File dir) {

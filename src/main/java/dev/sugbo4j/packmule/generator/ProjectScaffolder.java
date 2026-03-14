@@ -25,22 +25,16 @@ public class ProjectScaffolder {
         processDirectory("base", context, outputDir);
 
         // 2. Process Trigger
-        String triggerStr = (String) context.get("flowTrigger");
-        if (triggerStr != null && !triggerStr.isEmpty()) {
-            // Find trigger id matching label (simulating DB lookup, normally ID is passed
-            // directly)
-            String triggerId = triggerStr.contains("HTTP") ? "HTTP_LISTENER"
-                    : triggerStr.contains("Schedule") ? "SCHEDULER" : "ANYPOINT_MQ";
+        String triggerId = (String) context.get("flowTrigger");
+        if (triggerId != null && !triggerId.isEmpty()) {
             processDirectory("triggers/" + triggerId, context, outputDir);
         }
 
         // 3. Process Capabilities
         @SuppressWarnings("unchecked")
         List<String> capabilities = (List<String>) context.getOrDefault("capabilities", Collections.emptyList());
-        for (String capability : capabilities) {
-            String capId = capability.contains("Database") ? "DATABASE"
-                    : capability.contains("Salesforce") ? "SALESFORCE" : null;
-            if (capId != null) {
+        for (String capId : capabilities) {
+            if (capId != null && !capId.isEmpty()) {
                 processDirectory("capabilities/" + capId, context, outputDir);
             }
         }
@@ -50,6 +44,14 @@ public class ProjectScaffolder {
 
     private void processDirectory(String templateSubDir, Map<String, Object> context, File targetRootDir)
             throws Exception {
+        
+        File externalDir = new File("templates/" + templateSubDir);
+        if (externalDir.exists() && externalDir.isDirectory()) {
+            System.out.println("Using external templates from: " + externalDir.getAbsolutePath());
+            processExternalDirectory(externalDir, templateSubDir, context, targetRootDir);
+            return;
+        }
+
         URL resourceUrl = getClass().getResource("/templates/" + templateSubDir);
         if (resourceUrl == null) {
             System.out.println("Directory not found (skipping): /templates/" + templateSubDir);
@@ -100,5 +102,36 @@ public class ProjectScaffolder {
                 fs.close();
             }
         }
+    }
+
+    private void processExternalDirectory(File externalDir, String templateSubDir, Map<String, Object> context, File targetRootDir) throws Exception {
+        Path sourceDir = externalDir.toPath();
+        Files.walkFileTree(sourceDir, new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                try {
+                    // The relative path within the template sub dir
+                    Path relativePath = sourceDir.relativize(file);
+                    String relativePathStr = relativePath.toString().replace('\\', '/');
+
+                    // Evaluate filename and directory path via Mustache
+                    String evaluatedRelativePath = renderer.evaluateExpression(relativePathStr, context);
+
+                    File outputFile = new File(targetRootDir, evaluatedRelativePath);
+                    outputFile.getParentFile().mkdirs();
+
+                    // Render the content
+                    String content = renderer.renderFileTemplate(file, context);
+
+                    Files.writeString(outputFile.toPath(), content);
+                    System.out.println("  -> Created (ext): " + evaluatedRelativePath);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new IOException("Failed to process external file: " + file, e);
+                }
+                return FileVisitResult.CONTINUE;
+            }
+        });
     }
 }
