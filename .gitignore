@@ -39,5 +39,5 @@ hostkey.ser
 
 # Allure
 .allure
-.agents/rules/java-coding-guide.md
+.agents/rules/
 sample-tui-project-src/

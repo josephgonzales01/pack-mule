@@ -6,7 +6,7 @@ Pack Mule is a developer productivity tool that brings a fast, interactive proje
 
 ## 1. How the Tool Works
 
-Pack Mule is driven entirely by [JMustache](https://github.com/samskivert/jmustache) templates and powered by [TamboUI](https://tamboui.dev). It requires no external `mvn archetype:generate` subprocess or network calls to scaffold projects.
+Pack Mule is driven entirely by [JMustache](https://github.com/samskivert/jmustache) templates and powered by [TamboUI](https://tamboui.dev). It scaffolds projects locally using a pure Java engine with no external subprocesses or network calls.
 
 ### Architecture Highlights
 - **TUI Framework**: TamboUI provides a declarative DSL and TCSS theming for the terminal experience.
@@ -73,7 +73,7 @@ Template filenames are evaluated dynamically, which controls the output file pat
 
 ## 2. Project & Template Structure
 
-Instead of using a single monolithic project template cluttered with `{{#hasCapability}}` blocks, Pack Mule uses a **Composition over Configuration** directory strategy. Templates are modularized by foundation files, triggers, and capabilities.
+Pack Mule uses a **Composition over Configuration** directory strategy. Templates are modularized into foundation files, triggers, and capabilities, and are composed at generation time based on the user's selections.
 
 ### Directory Strategy
 
