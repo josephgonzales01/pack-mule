@@ -28,7 +28,7 @@ Pack Mule is a MuleSoft project initializer TUI built on [TamboUI](https://tambo
 
 ## Code of Conduct
 
-Participation in this project is governed by the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behaviour to **joseph.gonzales@fbu.com**.
+Participation in this project is governed by the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behaviour to **josephgonzales01@gmail.com**.
 
 ---
 

@@ -17,7 +17,7 @@ Pack Mule is in active development (`1.0.0-SNAPSHOT`). Security fixes are applie
 Instead, report vulnerabilities privately:
 
 - **Preferred**: use GitHub's [private vulnerability reporting](https://github.com/josephgonzales01/pack-mule/security/advisories/new).
-- **Alternatively**: email **joseph.gonzales@fbu.com** with the subject `Security: Pack Mule`.
+- **Alternatively**: email **josephgonzales01@gmail.com** with the subject `Security: Pack Mule`.
 
 Please include the following in your report:
 
