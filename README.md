@@ -196,7 +196,9 @@ mvn verify -Pintegration-tests  # End-to-end generation tests
 
 ## Contributing
 
-Pull requests are welcome. Please open an issue first to discuss changes. New capabilities should be accompanied by a FreeMarker template demonstrating their use, and dependency coordinates must be pinned to a specific version in `pack-mule.yml`.
+Contributions are welcome! Please read the [Contributing Guide](CONTRIBUTING.md) for setup, coding standards, and the pull-request workflow. Newcomers can check the [`good first issue`](https://github.com/josephgonzales01/pack-mule/labels/good%20first%20issue) label.
+
+Please open an issue first to discuss significant changes. New capabilities should be accompanied by a JMustache template demonstrating their use, and dependency coordinates must be pinned to a specific version in `pack-mule.yaml`. See [CHANGELOG.md](CHANGELOG.md) for release history and [SECURITY.md](SECURITY.md) for vulnerability reporting.
 
 > **Note:** TamboUI (`0.2.0-SNAPSHOT`) is under active development and its APIs may change between releases. If upgrading the BOM version causes compilation errors, check the [TamboUI changelog](https://github.com/tamboui/tamboui) and update affected screen classes.
 

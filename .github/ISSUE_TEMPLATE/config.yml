@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Ask a question / how-to
+    url: https://github.com/josephgonzales01/pack-mule/discussions
+    about: Usage questions and general discussion belong in GitHub Discussions, not in issues.
+  - name: 🔒 Report a security vulnerability
+    url: https://github.com/josephgonzales01/pack-mule/security/advisories/new
+    about: Please do NOT open public issues for security problems — use private vulnerability reporting.
+  - name: 📖 Read the docs
+    url: https://github.com/josephgonzales01/pack-mule#readme
+    about: Check the README and Solution Design before filing a bug.

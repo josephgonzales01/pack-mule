@@ -1,0 +1,23 @@
+# CODEOWNERS
+# https://docs.github.com/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# These users will be automatically requested for review on PRs that touch the
+# matching paths. Update the handle below to match the maintainer's GitHub login.
+
+# Default owner for the entire repository
+*                        @josephgonzales01
+
+# Core engine and scaffolder — require maintainer review
+/src/main/java/         @josephgonzales01
+/src/test/              @josephgonzales01
+/pom.xml                @josephgonzales01
+
+# Templates are lower-risk; still reviewed but can include org contributors
+/src/main/resources/templates/   @josephgonzales01
+
+# Governance & CI changes — maintainer only
+/.github/               @josephgonzales01
+/CONTRIBUTING.md        @josephgonzales01
+/SECURITY.md            @josephgonzales01
+/CODE_OF_CONDUCT.md     @josephgonzales01
+/CHANGELOG.md           @josephgonzales01
