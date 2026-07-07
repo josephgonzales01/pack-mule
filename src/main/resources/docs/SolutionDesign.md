@@ -249,3 +249,35 @@ mvn verify -Pintegration-tests  # End-to-end template generation tests
 - **TamboUI**: Note that the TUI framework used, TamboUI (`0.2.0-SNAPSHOT`), is under active development. Keep an eye on the [TamboUI changelog](https://github.com/tamboui/tamboui) if you are upgrading BOM versions.
 - **Templates**: New capabilities must be accompanied by appropriate JMustache template files demonstrating their use. Dependency coordinates must be pinned to a specific version in `pack-mule.yml`. 
 - **License**: Pack Mule is provided under the Apache License 2.0.
+
+---
+
+## 5. Roadmap
+
+### Standalone & Standards Layer
+
+- [ ] **CLI Argument Parsing** — allow organizations to provide custom configuration files via `--config /path/to/org-pack-mule.yml`
+- [ ] **Headless generation mode** — `--json`/`--headless` flag that accepts selections as JSON and writes the project without launching the TUI; unblocks scripting and the MCP server (Layer 1)
+- [ ] **AI handoff file** — generate `AGENTS.md` into every skeleton, seeded from `pack-mule.yaml`, describing generated artifacts, pinned dependency versions, and org standards so AI agents (MuleSoft Vibes, etc.) stay on-rails when generating business logic on top of the skeleton
+- [ ] **API spec import** — paste a RAML/OAS URL and Pack Mule scaffolds flows matching the spec endpoints
+- [ ] **Plugin ecosystem** — third-party capability packs (`.jar` + YAML fragment on classpath) to add connectors and templates without forking
+- [ ] **Post-generation hooks** — run optional shell scripts or Java hooks after generation (e.g., `git init`, copy shared config files)
+
+### MuleSoft Vibes Integration (MCP Server)
+
+Pack Mule's complement to [MuleSoft Vibes](https://www.mulesoft.com/platform/ai/vibes): Pack Mule produces the deterministic, peer-reviewed, standards-compliant skeleton; Vibes generates the business logic. The MCP server closes the one gap a repo-level rules file cannot — deterministic standards *validation during/after* AI generation.
+
+Built on the [official MCP Java SDK](https://github.com/modelcontextprotocol/java-sdk) (`io.modelcontextprotocol.sdk`, v2.0.0, MIT, Java 17+, stdio transport). Vibes supports configuring local MCP servers directly from the agent.
+
+- [ ] **`pack-mule-mcp` module** — new submodule (or `--mcp` main class) shipping the stdio MCP server alongside the existing TUI fat JAR; native-image compatible
+- [ ] **`scaffold_project` tool** — Vibes invokes scaffolding from chat (`projectName`, `groupId`, `trigger`, `capabilities[]`); returns a manifest of generated files
+- [ ] **`list_capabilities` / `list_triggers` tools** — return the `pack-mule.yaml` catalog so Vibes can present valid options to the user
+- [ ] **`add_capability` tool** — incrementally inject a module into an existing scaffolded project (e.g., add Database after initial generation)
+- [ ] **`get_dependency_coordinates` tool** — return pinned Maven coords for requested capabilities so Vibes references correct versions when generating flows
+- [ ] **`validate_standards` tool** *(headline feature)* — diff Vibes-edited files against approved org templates/rules (connector config shape, error-handler presence, property-placeholder usage, naming conventions) and return structured violations for Vibes to self-correct. This is the deterministic backstop that distinguishes Pack Mule from Vibes' own probabilistic generation
+
+### Sequencing
+
+1. Ship the **AI handoff file** + **headless mode** first (cheap, high leverage, useful even without Vibes).
+2. Watch for MuleSoft publishing the **Vibes Global Rules ingestion format** — if authorable, ship `AGENTS.md` content as a Vibes Global Rule to upgrade soft guidance to platform-enforced rules for free.
+3. Build the **MCP server** only when real demand for *standards validation during AI generation* surfaces; prioritize `validate_standards` over the convenience scaffolding tools.

@@ -41,3 +41,6 @@ hostkey.ser
 .allure
 .agents/rules/
 sample-tui-project-src/
+
+# Local-only AI sitemap
+llms.txt

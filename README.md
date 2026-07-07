@@ -15,7 +15,7 @@
 - [Adding Custom Templates](#adding-custom-templates)
 - [Getting Started](#getting-started)
 - [Building & Running](#building--running)
-- [Roadmap](#roadmap)
+- [Roadmap](./src/main/resources/docs/SolutionDesign.md#5-roadmap)
 
 ---
 
