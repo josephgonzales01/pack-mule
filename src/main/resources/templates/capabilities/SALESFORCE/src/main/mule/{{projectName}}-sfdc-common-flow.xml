@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:sfdc="http://www.mulesoft.org/schema/mule/sfdc"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+                          http://www.mulesoft.org/schema/mule/sfdc http://www.mulesoft.org/schema/mule/sfdc/current/mule-sfdc.xsd">
+
+    <sfdc:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config">
+        <sfdc:basic-connection username="${salesforce.username}" password="${salesforce.password}"
+                               securityToken="${salesforce.security.token}"/>
+    </sfdc:sfdc-config>
+
+    <sub-flow name="{{projectName}}-sfdc-common-flow">
+        <sfdc:query doc:name="Query" config-ref="Salesforce_Config">
+            <sfdc:salesforce-query><![CDATA[SELECT Id, Name FROM Account LIMIT 1]]></sfdc:salesforce-query>
+        </sfdc:query>
+    </sub-flow>
+</mule>

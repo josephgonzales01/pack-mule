@@ -30,7 +30,7 @@ triggers:
     dependencies: ["apikit", "http-connector"]
   
   - id: ANYPOINT_MQ
-    label: "Anypoint MQ Subscriber"
+    label: "Event-Driven & Messaging"
     dependencies: ["anypoint-mq"]
 
   - id: SCHEDULER

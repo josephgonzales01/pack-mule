@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:anypoint-mq="http://www.mulesoft.org/schema/mule/anypoint-mq"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+                          http://www.mulesoft.org/schema/mule/anypoint-mq http://www.mulesoft.org/schema/mule/anypoint-mq/current/mule-anypoint-mq.xsd">
+
+    <anypoint-mq:config name="Anypoint_MQ_Config" doc:name="Anypoint MQ Config">
+        <anypoint-mq:connection url="${anypoint.mq.url}" clientId="${anypoint.mq.client.id}" />
+    </anypoint-mq:config>
+
+    <flow name="{{projectName}}-mq-trigger" doc:id="{{projectName}}-mq-trigger">
+        <anypoint-mq:subscriber doc:name="MQ Subscriber" config-ref="Anypoint_MQ_Config"
+                                destination="${anypoint.mq.destination}"/>
+        <logger level="INFO" doc:name="Log Entry" message="MQ Message Received"/>
+        <!-- Call main flow -->
+        <flow-ref doc:name="Call main flow" name="{{projectName}}-main-flow"/>
+    </flow>
+</mule>

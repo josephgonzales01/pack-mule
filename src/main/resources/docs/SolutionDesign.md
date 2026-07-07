@@ -23,6 +23,10 @@ User launches PackMuleApp
 ConfigurationLoader parses pack-mule.yaml into PackMuleConfig
          │
          ▼
+ConfigValidator checks catalog ↔ template directory consistency
+         │  (fails fast with an actionable message if a registered ID
+         │   has no matching template folder or catalog entry)
+         ▼
 User confirms selections on SummaryScreen
          │
          ▼
@@ -169,6 +173,8 @@ To introduce a new capability or trigger:
 2. Add your `.xml` or `.yaml` snippet files. Ensure you utilize JMustache variables like `{{projectName}}`, `{{groupId}}`, and `{{muleVersion}}` so the templates adapt dynamically.
 3. Ensure the capability or trigger ID is registered in `pack-mule.yaml`.
 4. Register any necessary dependencies to the Dependency Catalog.
+
+> **Startup validation**: On launch, Pack Mule verifies that every trigger and capability ID registered in `pack-mule.yaml` has a matching `templates/{triggers|capabilities}/{id}/` directory and that every referenced dependency key exists in the catalog. If a mismatch is found (e.g. a typo'd ID, a missing template folder, or an undeclared dependency key), the tool prints the offending entries and exits before the TUI starts — so misconfigurations are caught immediately instead of silently skipping generation.
 
 ### Overriding Templates at Runtime (External Template Directory)
 

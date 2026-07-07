@@ -3,9 +3,12 @@ package dev.sugbo4j.packmule;
 import dev.sugbo4j.packmule.generator.ProjectScaffolder;
 import dev.sugbo4j.packmule.generator.DependencyResolver;
 import dev.sugbo4j.packmule.model.ProjectConfig;
+import dev.sugbo4j.packmule.model.config.ConfigurationLoader;
+import dev.sugbo4j.packmule.model.config.PackMuleConfig;
 import dev.sugbo4j.packmule.tui.CapabilitiesScreen;
 import dev.sugbo4j.packmule.tui.ProjectInfoScreen;
 import dev.sugbo4j.packmule.tui.Theme;
+import dev.sugbo4j.packmule.validator.ConfigValidator;
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
@@ -249,6 +252,22 @@ public class PackMuleApp extends ToolkitApp {
      * Main entry point.
      */
     public static void main(String[] args) throws Exception {
+        PackMuleConfig config = ConfigurationLoader.loadFromClasspath("/pack-mule.yaml");
+        ConfigValidator.Result validation = ConfigValidator.validate(config);
+        if (!validation.isValid()) {
+            System.err.println("Configuration validation failed — fix the following before running Pack Mule:");
+            for (String error : validation.errors()) {
+                System.err.println("  ERROR: " + error);
+            }
+            for (String warning : validation.warnings()) {
+                System.err.println("  WARN:  " + warning);
+            }
+            System.exit(1);
+        }
+        for (String warning : validation.warnings()) {
+            System.out.println("WARN: " + warning);
+        }
+
         var app = new PackMuleApp();
         app.run();
     }
