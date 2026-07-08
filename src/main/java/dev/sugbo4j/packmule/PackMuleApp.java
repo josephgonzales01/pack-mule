@@ -1,7 +1,7 @@
 package dev.sugbo4j.packmule;
 
-import dev.sugbo4j.packmule.generator.ProjectScaffolder;
-import dev.sugbo4j.packmule.generator.DependencyResolver;
+import dev.sugbo4j.packmule.generator.GenerationService;
+import dev.sugbo4j.packmule.model.GenerationResult;
 import dev.sugbo4j.packmule.model.ProjectConfig;
 import dev.sugbo4j.packmule.model.config.ConfigurationLoader;
 import dev.sugbo4j.packmule.model.config.PackMuleConfig;
@@ -9,10 +9,7 @@ import dev.sugbo4j.packmule.tui.CapabilitiesScreen;
 import dev.sugbo4j.packmule.tui.ProjectInfoScreen;
 import dev.sugbo4j.packmule.tui.Theme;
 import dev.sugbo4j.packmule.validator.ConfigValidator;
-import java.io.File;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.nio.file.Paths;
 import dev.tamboui.tui.event.KeyCode;
 import dev.tamboui.tui.event.KeyEvent;
 import dev.tamboui.toolkit.app.ToolkitApp;
@@ -205,46 +202,25 @@ public class PackMuleApp extends ToolkitApp {
     }
 
     /**
-     * Generate the project based on current configuration.
-     * This is a placeholder for the actual project generation logic.
+     * Generate the project by delegating to GenerationService.
+     * Presentation (stdout) lives here; the engine returns a structured result.
      */
     private void generateProject() {
         System.out.println("\n=== Generating Project ===");
         try {
-            // Build the context map
-            Map<String, Object> context = new HashMap<>();
-            context.put("projectName", config.getProjectName());
-            context.put("groupId", config.getGroupId());
-            context.put("muleVersion", config.getMuleRuntime());
-            context.put("javaVersion", config.getJavaVersion());
-            context.put("flowTrigger", config.getTrigger());
+            GenerationService service = new GenerationService();
+            GenerationResult result = service.generate(config, Paths.get(config.getOutputDirectory()));
 
-            if (config.getQueueType() != null) {
-                context.put("queueType", config.getQueueType());
+            System.out.println("\nGenerated " + result.generatedFiles().size() + " file(s):");
+            for (String file : result.generatedFiles()) {
+                System.out.println("  -> " + file);
             }
-
-            context.put("capabilities", config.getCapabilities());
-
-            // Resolve dependencies from pack-mule.yaml dynamically
-            DependencyResolver dependencyResolver = new DependencyResolver();
-            List<Map<String, String>> deps = dependencyResolver.resolveDependencies(config);
-            context.put("selectedDependencies", deps);
-
-            // Hardcode port for sample
-            context.put("port", "8081");
-
-            File outputDir = new File(config.getOutputDirectory(), config.getProjectName());
-
-            ProjectScaffolder scaffolder = new ProjectScaffolder();
-            scaffolder.scaffold(context, outputDir);
-
-            System.out.println("\nSuccessfully generated project at: " + outputDir.getAbsolutePath());
+            System.out.println("\nSuccessfully generated project at: " + result.projectDir().toAbsolutePath());
         } catch (Exception e) {
             System.err.println("\nFailed to generate project: " + e.getMessage());
             e.printStackTrace();
         }
 
-        // Exit the application after generation
         quit();
     }
 

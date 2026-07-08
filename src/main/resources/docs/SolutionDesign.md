@@ -10,8 +10,9 @@ Pack Mule is driven entirely by [JMustache](https://github.com/samskivert/jmusta
 
 ### Architecture Highlights
 - **TUI Framework**: TamboUI provides a declarative DSL and TCSS theming for the terminal experience.
+- **Generation Service**: A UI-agnostic entry point (`GenerationService`) orchestrates the pipeline — context-map building, dependency resolution, and scaffolding — and returns a structured `GenerationResult`. Any future frontend (CLI, MCP server) calls the same method.
 - **Template Engine**: JMustache handles logic-less, whitespace-friendly templating that does not conflict with Mule's native `${var}` syntax.
-- **Project Scaffolder**: A pure Java component replaces Maven Archetypes to dynamically assemble project trees offline.
+- **Project Scaffolder**: A pure Java component replaces Maven Archetypes to dynamically assemble project trees offline. Returns a list of generated file paths (no stdout).
 - **Configuration**: A single `pack-mule.yaml` file defines the dependency catalog, capabilities, triggers, and default values.
 
 ### The Generation Pipeline
@@ -30,7 +31,7 @@ ConfigValidator checks catalog ↔ template directory consistency
 User confirms selections on SummaryScreen
          │
          ▼
-PackMuleApp.generateProject()
+GenerationService.generate(config, outputDir)
          │
          ├─▶ DependencyResolver.resolveDependencies()
          │         └─▶ Reads required dependencies from catalog for selected triggers and capabilities
@@ -50,8 +51,14 @@ PackMuleApp.generateProject()
                              │
                              └─▶ TemplateRenderer.renderClasspathTemplate(content)
                                        └─▶ JMustache evaluates variables and writes to target directory
+                   │
+                   ▼
+         Returns GenerationResult
+              ├─▶ projectDir: Path to the generated project root
+              ├─▶ generatedFiles: List of relative file paths created
+              └─▶ resolvedDependencies: List of Maven coordinate maps
 ```
-*Note: The `DependencyResolver` dynamically parses dependencies directly from `pack-mule.yaml` based on the user's selected capabilities and triggers, injecting the correct Maven coordinates into the Mustache context.*
+*Note: `GenerationService` is the single UI-agnostic entry point for project generation. The TUI (`PackMuleApp`) calls it on F9 and prints the `GenerationResult` to stdout. A future CLI or MCP server calls the same method and serializes the result as JSON.*
 
 ### State Management & User Inputs
 When the user selects their project name, triggers, and capabilities in the TUI, the Java controller collects these answers into a generic `Map<String, Object> context`. 
